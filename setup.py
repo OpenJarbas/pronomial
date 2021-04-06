@@ -2,8 +2,8 @@ from setuptools import setup
 
 setup(
     name='pronomial',
-    version='0.0.1',
-    packages=['pronomial'],
+    version='0.0.2',
+    packages=['pronomial', 'pronomial.lang'],
     url='https://github.com/OpenJarbas/pronomial',
     license='apache-2.0',
     author='jarbasAi',

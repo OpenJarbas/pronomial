@@ -6,7 +6,6 @@ import nltk
 from string import punctuation
 from random import shuffle
 
-
 CATEGORY_PT = {
     'male': ['ele', "lo", "dele", "nele", "seu"],
     'female': ['ela', "la", "dela", "nela", "sua"],
@@ -87,15 +86,17 @@ def train_pt_tagger(path):
         t = t.lower()
         return tagdict.get(t, "." if all(tt in punctuation for tt in t) else t)
 
-    dataset1 = list(nltk.corpus.floresta.tagged_sents())
-    dataset2 = [[w[0] for w in sent]
-                for sent in nltk.corpus.mac_morpho.tagged_paras()]
+    floresta = [[(w, convert_to_universal_tag(t))
+                 for (w, t) in sent]
+                for sent in nltk.corpus.floresta.tagged_sents()]
+    shuffle(floresta)
 
-    traindata = [[(w, convert_to_universal_tag(t)) for (w, t) in sent] for sent in dataset1]
-    traindata2 = traindata + [[(w, convert_to_universal_tag(t, reverse=True)) for (w, t) in sent] for sent in dataset2]
-
-    shuffle(traindata)
-    shuffle(traindata2)
+    mac_morpho = [[w[0] for w in sent] for sent in
+                  nltk.corpus.mac_morpho.tagged_paras()]
+    mac_morpho = [
+        [(w, convert_to_universal_tag(t, reverse=True))
+         for (w, t) in sent] for sent in mac_morpho]
+    shuffle(mac_morpho)
 
     regex_patterns = [
         (r"^[nN][ao]s?$", "ADP"),
@@ -110,21 +111,22 @@ def train_pt_tagger(path):
 
     def_tagger = nltk.DefaultTagger('NOUN')
     affix_tagger = nltk.AffixTagger(
-        traindata2, backoff=def_tagger
+        mac_morpho + floresta, backoff=def_tagger
     )
     unitagger = nltk.UnigramTagger(
-        traindata2, backoff=affix_tagger
+        mac_morpho + floresta, backoff=affix_tagger
     )
     rx_tagger = nltk.RegexpTagger(
         regex_patterns, backoff=unitagger
     )
+
     tagger = nltk.BigramTagger(
-        traindata, backoff=rx_tagger
+        floresta, backoff=rx_tagger
     )
 
-    templates = nltk.brill.fntbl37()
-    tagger = nltk.BrillTaggerTrainer(tagger, templates)
-    tagger = tagger.train(traindata, max_rules=100)
+    tagger = nltk.BrillTaggerTrainer(tagger, nltk.brill.fntbl37())
+    tagger = tagger.train(floresta, max_rules=100)
+
     with open(path, "wb") as f:
         pickle.dump(tagger, f)
 
@@ -147,5 +149,3 @@ def pos_tag_pt(tokens):
     if isinstance(tokens, str):
         tokens = word_tokenize(tokens)
     return _POSTAGGER.tag(tokens)
-
-
