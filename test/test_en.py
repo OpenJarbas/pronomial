@@ -65,6 +65,10 @@ class TestCorefEN(unittest.TestCase):
             replace_corefs("is the light turned on? turn it off"),
             "is the light turned on ? turn light off"
         )
+        self.assertEqual(
+            replace_corefs("Turn off the light and change it to blue"),
+            "Turn off the light and change light to blue"
+        )
 
         # it + who
         self.assertEqual(
@@ -95,6 +99,12 @@ class TestCorefEN(unittest.TestCase):
             replace_corefs("call Mom. tell her to buy eggs. tell her to buy "
                            "coffee. tell her to buy milk"),
             "call Mom . tell Mom to buy eggs . tell Mom to buy coffee . tell Mom to buy milk"
+        )
+        # dad -> male
+        self.assertEqual(
+            replace_corefs("call dad. tell him to buy bacon. tell him to buy "
+                           "coffee. tell him to buy beer"),
+            "call dad . tell dad to buy bacon . tell dad to buy coffee . tell dad to buy beer"
         )
 
     def test_hardcoded_postag_fixes(self):

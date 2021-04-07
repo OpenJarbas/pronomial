@@ -28,7 +28,6 @@ def pos_tag_en(tokens):
         tokens = word_tokenize(tokens)
 
     postagged = _ptag(tokens)
-
     # HACK this fixes some know failures from postag
     # this is not sustainable but important cases can be added at any time
     # PRs + unittests welcome!
@@ -40,7 +39,7 @@ def pos_tag_en(tokens):
         if w.lower() in ONOFF_VERBS and next_w.lower() in ON_OFF:
             # turn on/off
             if t == "NN":
-                postagged[idx] = (w, "VBZ")
+                postagged[idx] = (w, "VB")
                 postagged[idx + 1] = (next_w, "RP")
     # END HACK
 
