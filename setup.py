@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='pronomial',
-    version='0.0.4',
+    version='0.0.4a1',
     packages=['pronomial', 'pronomial.lang'],
     url='https://github.com/OpenJarbas/pronomial',
     license='apache-2.0',
