@@ -9,8 +9,8 @@ class TestCorefEN(unittest.TestCase):
 
     def test_female(self):
         self.assertEqual(
-            replace_corefs("The girl said she would take the trash out."),
-            "The girl said girl would take the trash out ."
+            replace_corefs("Inês said she loves me!"),
+            "Inês said Inês loves me !"
         )
 
     def test_male(self):
@@ -58,13 +58,14 @@ class TestCorefEN(unittest.TestCase):
             "Here is the book now take book ."
         )
         self.assertEqual(
-            replace_corefs("The sign was too far away for the boy to read it."),
-            "The sign was too far away for the boy to read sign ."
-        )
-        self.assertEqual(
             replace_corefs("Dog is man's best friend. It is always loyal."),
             "Dog is man 's best friend . Dog is always loyal ."
         )
+        self.assertEqual(
+            replace_corefs("is the light turned on? turn it off"),
+            "is the light turned on ? turn light off"
+        )
+
         # it + who
         self.assertEqual(
             replace_corefs("London is the capital and most populous city of England and the United Kingdom. "
@@ -77,6 +78,34 @@ class TestCorefEN(unittest.TestCase):
             "London was founded by the Romans , Romans named London Londinium ."
         )
 
+    def test_dictionary_words(self):
+        # harcoded wordlists that map words to gendered pronouns
+        # boy -> male
+        self.assertEqual(
+            replace_corefs("The sign was too far away for the boy to read it."),
+            "The sign was too far away for the boy to read sign ."
+        )
+        # girl -> female
+        self.assertEqual(
+            replace_corefs("The girl said she would take the trash out."),
+            "The girl said girl would take the trash out ."
+        )
+        # mom -> female
+        self.assertEqual(
+            replace_corefs("call Mom. tell her to buy eggs. tell her to buy "
+                           "coffee. tell her to buy milk"),
+            "call Mom . tell Mom to buy eggs . tell Mom to buy coffee . tell Mom to buy milk"
+        )
+
+    def test_hardcoded_postag_fixes(self):
+        # failure cases
+        # pos_tag confused Turn with a name, this specific use is corrected
+        # manually when detected
+        self.assertEqual(
+            replace_corefs("Turn on the light and change it to blue"),
+            "Turn on the light and change light to blue"
+        )
+
     def test_known_failures(self):
         # understandable mistakes
         self.assertEqual(
@@ -84,24 +113,12 @@ class TestCorefEN(unittest.TestCase):
             "Chris is very handsome . Chris is Australian . Elsa lives in Arendelle . Chris likes Arendelle ."
             # "Chris is very handsome . Chris is Australian . Elsa lives in Arendelle . Chris likes Elsa ."
         )
+
+        # TODO try to handle these
         self.assertEqual(
             replace_corefs( "Bob telephoned Jake to tell him that he lost the laptop."),
             "Bob telephoned Jake to tell Jake that Jake lost the laptop ."
             # Bob telephoned Jake to tell Jake that Bob lost the laptop .
         )
 
-        # failure cases TODO try to handle these
-        self.assertEqual(
-            replace_corefs("Turn on the light and change it to blue"),
-            "Turn on the light and change Turn to blue"
-        )
-        self.assertEqual(
-            replace_corefs("My sister has a dog. She loves him"),
-            "My sister has a dog . sister loves sister"
-        )
-        self.assertEqual(
-            replace_corefs("call Mom. tell her to buy eggs. tell her to buy "
-                           "coffee. tell her to buy milk"),
-            "call Mom . tell call to buy eggs . tell call to buy coffee ."
-            " tell call to buy milk"
-        )
+

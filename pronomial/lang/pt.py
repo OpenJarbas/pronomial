@@ -7,8 +7,10 @@ from string import punctuation
 from random import shuffle
 
 CATEGORY_PT = {
-    'male': ['ele', "lo", "dele", "nele", "seu"],
-    'female': ['ela', "la", "dela", "nela", "sua"],
+    'male': ['ele', "lo", "dele", "nele", "seu", "eles", "seus", "deles",
+             "neles"],
+    'female': ['ela', "la", "dela", "nela", "sua", "elas", "suas", "delas",
+               "nelas"],
     'first': ['eu', 'me', 'mim', 'nós', "comigo", "meu", "minha", "meus",
               "minhas"],
     'neutral': ["tu", "te", "ti", "lhe", "contigo", "consigo", "si"],
@@ -21,6 +23,24 @@ NOUN_TAG_PT = ['NOUN']
 JJ_TAG_PT = ['ADJ']
 PLURAL_NOUN_TAG_PT = ['NOUN']
 SUBJ_TAG_PT = ['NOUN']
+
+# word rules for gender
+_FEMALE_ENDINGS_PT = ["a", "as"]
+_MALE_ENDINGS_PT = ["o", "os"]
+
+# special cases, word lookup for words not covered by above rule
+GENDERED_WORDS_PT = {
+    "female": ["mãe", "irmã", "tia", "amiga", "prima", "namorada", "mulher",
+               "mulheres", "rapariga", "raparigas", "gaja", "gajas", "moça",
+               "moças", "elas", "suas"],
+    "male": ["pai", "irmão", "tio", "amigo", "primo", "namorado", "homem",
+             "homens", "rapaz", "rapazes", "gajo", "gajos", "moço", "moços",
+             "eles", "seus"]
+}
+
+# context rules for gender
+MALE_DETERMINANTS_PT = ["o", "os", "este", "estes", "esse", "esses"]
+FEMALE_DETERMINANTS_PT = ["a", "as", "estas", "estas", "essa", "essas"]
 
 
 def train_pt_tagger(path):
@@ -149,3 +169,39 @@ def pos_tag_pt(tokens):
     if isinstance(tokens, str):
         tokens = word_tokenize(tokens)
     return _POSTAGGER.tag(tokens)
+
+
+def predict_gender_pt(word, text=""):
+    # parse gender taking context into account
+    word = word.lower()
+    words = text.lower().split(" ")
+    for idx, w in enumerate(words):
+        if w == word and idx != 0:
+            # in portuguese usually the previous word (a determinant)
+            # assigns gender to the next word
+            previous = words[idx - 1].lower()
+            if previous in MALE_DETERMINANTS_PT:
+                return "male"
+            elif previous in FEMALE_DETERMINANTS_PT:
+                return "female"
+
+    # get gender using only the individual word
+    # see if this word has the gender defined
+    if word in GENDERED_WORDS_PT["male"]:
+        return "male"
+    if word in GENDERED_WORDS_PT["female"]:
+        return "female"
+    singular = word.rstrip("s")
+    if singular in GENDERED_WORDS_PT["male"]:
+        return "male"
+    if singular in GENDERED_WORDS_PT["male"]:
+        return "female"
+    # in portuguese the last vowel usually defines the gender of a word
+    # the gender of the determinant takes precedence over this rule
+    for end_str in _FEMALE_ENDINGS_PT:
+        if word.endswith(end_str):
+            return "female"
+    for end_str in _MALE_ENDINGS_PT:
+        if word.endswith(end_str):
+            return "male"
+    return None

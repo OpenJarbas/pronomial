@@ -20,7 +20,9 @@ def _get_features(name):
     return {
         'suffix1': name[-1],
         'suffix2': name[-2:],
-        'suffix3': name[-3:]
+        'suffix3': name[-3:],
+        'suffix4': name[-4:],
+        'suffix5': name[-5:]
     }
 
 
@@ -48,5 +50,14 @@ def load_gender_classifier(path=None):
 GENDER = load_gender_classifier()
 
 
-def predict_gender(word):
+def predict_gender(word, text="", lang="en"):
+    if lang.startswith("en"):
+        from pronomial.lang.en import GENDERED_WORDS_EN
+        for k, v in GENDERED_WORDS_EN.items():
+            if word.lower() in v:
+                return k
+    if lang.startswith("pt"):
+        from pronomial.lang.pt import predict_gender_pt
+        return predict_gender_pt(word, text)
+
     return GENDER.classify(_get_features(word))

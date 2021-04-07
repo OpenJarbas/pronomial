@@ -9,8 +9,8 @@ class TestCorefPT(unittest.TestCase):
 
     def test_female(self):
         self.assertEqual(
-            replace_corefs("A ana gosta de cães. Ela tem dois", lang="pt"),
-            "A ana gosta de cães . ana tem dois"
+            replace_corefs("A Ana gosta de cães. Ela tem dois", lang="pt"),
+            "A Ana gosta de cães . Ana tem dois"
         )
 
     def test_male(self):
