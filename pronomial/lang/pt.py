@@ -139,11 +139,9 @@ def train_pt_tagger(path):
     rx_tagger = nltk.RegexpTagger(
         regex_patterns, backoff=unitagger
     )
-
     tagger = nltk.BigramTagger(
         floresta, backoff=rx_tagger
     )
-
     tagger = nltk.BrillTaggerTrainer(tagger, nltk.brill.fntbl37())
     tagger = tagger.train(floresta, max_rules=100)
 

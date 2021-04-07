@@ -12,6 +12,11 @@ class TestCorefEN(unittest.TestCase):
             replace_corefs("Inês said she loves me!"),
             "Inês said Inês loves me !"
         )
+        self.assertEqual(
+            replace_corefs("Bob threatened to kill Alice to make her pay "
+                           "her debts"),
+            "Bob threatened to kill Alice to make Alice pay Alice debts"
+        )
 
     def test_male(self):
         self.assertEqual(
@@ -31,20 +36,24 @@ class TestCorefEN(unittest.TestCase):
 
     def test_plural(self):
         self.assertEqual(
-            replace_corefs("Members voted for John because they see him as a good leader."),
+            replace_corefs(
+                "Members voted for John because they see him as a good leader."),
             "Members voted for John because Members see John as a good leader ."
         )
         self.assertEqual(
-            replace_corefs("Leaders around the world say they stand for peace."),
+            replace_corefs(
+                "Leaders around the world say they stand for peace."),
             "Leaders around the world say Leaders stand for peace ."
         )
         self.assertEqual(
-            replace_corefs("I have many friends. They are an important part of my life."),
+            replace_corefs(
+                "I have many friends. They are an important part of my life."),
             "I have many friends . friends are an important part of my life ."
         )
         # they + it
         self.assertEqual(
-            replace_corefs("My neighbours just adopted a puppy. They care for it like a baby."),
+            replace_corefs(
+                "My neighbours just adopted a puppy. They care for it like a baby."),
             "My neighbours just adopted a puppy . neighbours care for puppy like a baby ."
         )
 
@@ -72,10 +81,11 @@ class TestCorefEN(unittest.TestCase):
 
         # it + who
         self.assertEqual(
-            replace_corefs("London is the capital and most populous city of England and the United Kingdom. "
-                           "Standing on the River Thames in the south east of the island of Great Britain, "
-                           "London has been a major settlement for two millennia. "
-                           "It was founded by the Romans, who named it Londinium."),
+            replace_corefs(
+                "London is the capital and most populous city of England and the United Kingdom. "
+                "Standing on the River Thames in the south east of the island of Great Britain, "
+                "London has been a major settlement for two millennia. "
+                "It was founded by the Romans, who named it Londinium."),
             "London is the capital and most populous city of England and the United Kingdom . "
             "Standing on the River Thames in the south east of the island of Great Britain , "
             "London has been a major settlement for two millennia . "
@@ -86,7 +96,8 @@ class TestCorefEN(unittest.TestCase):
         # harcoded wordlists that map words to gendered pronouns
         # boy -> male
         self.assertEqual(
-            replace_corefs("The sign was too far away for the boy to read it."),
+            replace_corefs(
+                "The sign was too far away for the boy to read it."),
             "The sign was too far away for the boy to read sign ."
         )
         # girl -> female
@@ -116,19 +127,50 @@ class TestCorefEN(unittest.TestCase):
             "Turn on the light and change light to blue"
         )
 
-    def test_known_failures(self):
+    def test_ambiguous(self):
         # understandable mistakes
         self.assertEqual(
-            replace_corefs("Chris is very handsome. He is Australian. Elsa lives in Arendelle. He likes her."),
+            replace_corefs(
+                "Chris is very handsome. He is Australian. Elsa lives in Arendelle. He likes her."),
             "Chris is very handsome . Chris is Australian . Elsa lives in Arendelle . Chris likes Arendelle ."
             # "Chris is very handsome . Chris is Australian . Elsa lives in Arendelle . Chris likes Elsa ."
         )
 
-        # TODO try to handle these
+    def test_with(self):
+        # "with her/him/them" will select first male/female/plural noun
+        # instead of last seen
         self.assertEqual(
-            replace_corefs( "Bob telephoned Jake to tell him that he lost the laptop."),
-            "Bob telephoned Jake to tell Jake that Jake lost the laptop ."
-            # Bob telephoned Jake to tell Jake that Bob lost the laptop .
+            replace_corefs("Kevin invited Bob to go with him to "
+                           "his favorite fishing spot"),
+            "Kevin invited Bob to go with Kevin to Bob favorite fishing spot"
+        )
+        self.assertEqual(
+            replace_corefs("Alice invited Marcia to go with her to "
+                           "their favorite store"),
+            "Alice invited Marcia to go with Alice to Marcia favorite store"
+        )
+        self.assertEqual(
+            replace_corefs("The Martians invited the Venusians to go with "
+                           "them to Pluto"),
+            "The Martians invited the Venusians to go with Martians to Pluto"
         )
 
+    def test_that(self):
+        # "that her/he/they" will select first male/female/plural noun
+        # instead of last seen
+        self.assertEqual(
+            replace_corefs(
+                "Bob telephoned Jake to tell him that he lost the laptop."),
+            "Bob telephoned Jake to tell Jake that Bob lost the laptop ."
+        )
+        self.assertEqual(
+            replace_corefs("Ana telephoned Alice to tell her that she lost "
+                           "the bus"),
+            "Ana telephoned Alice to tell Alice that Ana lost the bus"
+        )
+        self.assertEqual(
+            replace_corefs("The Martians told the Venusians that they used "
+                           "to have an ocean"),
+            "The Martians told the Venusians that Martians used to have an ocean"
+        )
 

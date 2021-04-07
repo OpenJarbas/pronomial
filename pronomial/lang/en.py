@@ -9,6 +9,13 @@ CATEGORY_EN = {
     'neutral': ['it', 'itself', 'its'],
     'plural': ['they', 'them', 'themselves', 'their', 'theirs', "who"]
 }
+
+WITH_EN = ["with"]
+WITH_FOLLOWUP_EN = ["him", "her", "them"]
+
+THAT_EN = ["that"]
+THAT_FOLLOWUP_EN = ["he", "she", "they"]
+
 PRONOUN_TAG_EN = ['PRP', 'PRP$', 'WP', 'WP$']
 NOUN_TAG_EN = ['NN', 'NNP']
 JJ_TAG_EN = ['JJ']
