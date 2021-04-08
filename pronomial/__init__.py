@@ -4,6 +4,15 @@ from pronomial.utils import predict_gender, pos_tag, word_tokenize
 class PronomialCoreferenceSolver:
     @staticmethod
     def solve_corefs(sentence, lang="en"):
+        # universal tagset, langs can override these depending on pos tagger
+        # model
+        PRONOUN_TAG = ['PRON']
+        NOUN_TAG = ['NOUN']
+        JJ_TAG = ['ADJ']
+        PLURAL_NOUN_TAG = ['NOUN']
+        SUBJ_TAG = ['NOUN']
+        WITH = WITH_FOLLOWUP = THAT = THAT_FOLLOWUP = []
+
         if lang.startswith("en"):
             from pronomial.lang.en import NOUN_TAG_EN, PLURAL_NOUN_TAG_EN, \
                 CATEGORY_EN, PRONOUN_TAG_EN, SUBJ_TAG_EN, JJ_TAG_EN, WITH_EN,\
@@ -20,17 +29,13 @@ class PronomialCoreferenceSolver:
             THAT = THAT_EN
             THAT_FOLLOWUP = THAT_FOLLOWUP_EN
         elif lang.startswith("pt"):
-            from pronomial.lang.pt import NOUN_TAG_PT, PLURAL_NOUN_TAG_PT, \
-                PRONOUN_TAG_PT, SUBJ_TAG_PT, JJ_TAG_PT, CATEGORY_PT, \
-                GENDERED_WORDS_PT
-            NOUN_TAG = NOUN_TAG_PT
+            from pronomial.lang.pt import CATEGORY_PT, GENDERED_WORDS_PT
             GENDERED_WORDS = GENDERED_WORDS_PT
-            SUBJ_TAG = SUBJ_TAG_PT
-            PRONOUN_TAG = PRONOUN_TAG_PT
             CATEGORY = CATEGORY_PT
-            PLURAL_NOUN_TAG = PLURAL_NOUN_TAG_PT
-            JJ_TAG = JJ_TAG_PT
-            WITH = WITH_FOLLOWUP = THAT = THAT_FOLLOWUP = []
+        elif lang.startswith("es"):
+            from pronomial.lang.es import CATEGORY_ES, GENDERED_WORDS_ES
+            GENDERED_WORDS = GENDERED_WORDS_ES
+            CATEGORY = CATEGORY_ES
         else:
             raise NotImplementedError
 
@@ -53,7 +58,7 @@ class PronomialCoreferenceSolver:
             idz = -1
             if prev_w.lower() in WITH and w.lower() in WITH_FOLLOWUP:
                 idz = 0
-            elif prev_w.lower() in THAT and w.lower() in THAT_FOLLOWUP_EN:
+            elif prev_w.lower() in THAT and w.lower() in THAT_FOLLOWUP:
                 idz = 0
 
             if t in NOUN_TAG:

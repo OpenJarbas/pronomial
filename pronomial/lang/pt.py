@@ -18,11 +18,7 @@ CATEGORY_PT = {
                "neles", "nelas", "convosco", "conosco", "connosco", "teus",
                "tuas", "seus", "suas", "nossos", "vossos", "nossas", "vossas"]
 }
-PRONOUN_TAG_PT = ['PRON']
-NOUN_TAG_PT = ['NOUN']
-JJ_TAG_PT = ['ADJ']
-PLURAL_NOUN_TAG_PT = ['NOUN']
-SUBJ_TAG_PT = ['NOUN']
+
 
 # word rules for gender
 _FEMALE_ENDINGS_PT = ["a", "as"]
