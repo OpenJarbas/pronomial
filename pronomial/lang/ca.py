@@ -6,11 +6,10 @@ import nltk
 from string import punctuation
 from random import shuffle
 
-
 PRONOUNS_CA = {
-  'male': ['ello', "lo", 'ellos', "los"],
+    'male': ['ello', "lo", 'ellos', "los"],
     'female': ['ella', "la", 'ellas', "las"],
-      'first': ['yo', 'me', 'mí', 'mío', "mía", "meu"],
+    'first': ['yo', 'me', 'mí', 'mío', "mía"],
     'neutral': ["tú", "vos", "te", "le", "se", "l'", "él"],
     'plural': ['nosotras', 'nosotros', 'nuestros', 'nuestras', 'vuestro',
                'vuestra', "ellos", "ellas"]
@@ -25,6 +24,7 @@ GENDERED_WORDS_CA = {
 # context rules for gender
 MALE_DETERMINANTS_CA = ["lo", "los", "ello", "ellos"]
 FEMALE_DETERMINANTS_CA = ["la", "las", "ella", "ellas"]
+
 
 def train_ca_tagger(path):
     nltk.download('cess_cat')
@@ -428,4 +428,3 @@ def predict_gender_ca(word, text=""):
         if word.endswith(end_str):
             return "male"
     return None
-

@@ -6,11 +6,10 @@ import nltk
 from string import punctuation
 from random import shuffle
 
-
 PRONOUNS_ES = {
     'male': ['ello', "lo", 'ellos', "los"],
     'female': ['ella', "la", 'ellas', "las"],
-    'first': ['yo', 'me', 'mí', 'mío', "mía", "meu"],
+    'first': ['yo', 'me', 'mí', 'mío', "mía"],
     'neutral': ["tú", "vos", "te", "le", "se", "l'", "él"],
     'plural': ['nosotras', 'nosotros', 'nuestros', 'nuestras', 'vuestro',
                'vuestra', "ellos", "ellas"]
