@@ -36,6 +36,10 @@ class PronomialCoreferenceSolver:
             from pronomial.lang.es import PRONOUNS_ES, GENDERED_WORDS_ES
             GENDERED_WORDS = GENDERED_WORDS_ES
             PRONOUNS = PRONOUNS_ES
+        elif lang.startswith("ca"):
+            from pronomial.lang.ca import PRONOUNS_CA, GENDERED_WORDS_CA
+            GENDERED_WORDS = GENDERED_WORDS_CA
+            PRONOUNS = PRONOUNS_CA
         else:
             raise NotImplementedError
 

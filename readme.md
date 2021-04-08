@@ -3,7 +3,7 @@
 simple and fast coreference solver, uses pos tags, a word gender classifier 
 and lists of pronouns
 
-Supported languages: English, Portuguese
+Supported languages: English, Portuguese, Spanish, Catalan
 
 # Install
 
