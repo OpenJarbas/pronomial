@@ -6,6 +6,8 @@ import pickle
 
 from pronomial.lang.pt import pos_tag_pt
 from pronomial.lang.en import pos_tag_en
+from pronomial.lang.es import pos_tag_es
+from pronomial.lang.ca import pos_tag_ca
 
 
 def pos_tag(text, lang="en"):
@@ -13,6 +15,10 @@ def pos_tag(text, lang="en"):
         return pos_tag_en(text)
     if lang.startswith("pt"):
         return pos_tag_pt(text)
+    if lang.startswith("es"):
+        return pos_tag_es(text)
+    if lang.startswith("pt"):
+        return pos_tag_ca(text)
     raise NotImplementedError
 
 
@@ -51,13 +57,21 @@ GENDER = load_gender_classifier()
 
 
 def predict_gender(word, text="", lang="en"):
+    gender = None
     if lang.startswith("en"):
         from pronomial.lang.en import GENDERED_WORDS_EN
         for k, v in GENDERED_WORDS_EN.items():
             if word.lower() in v:
-                return k
+                gender = k
+                break
     if lang.startswith("pt"):
         from pronomial.lang.pt import predict_gender_pt
-        return predict_gender_pt(word, text)
+        gender = predict_gender_pt(word, text)
+    if lang.startswith("es"):
+        from pronomial.lang.es import predict_gender_es
+        gender = predict_gender_es(word, text)
+    if lang.startswith("ca"):
+        from pronomial.lang.ca import predict_gender_ca
+        gender = predict_gender_ca(word, text)
 
-    return GENDER.classify(_get_features(word))
+    return gender or GENDER.classify(_get_features(word))

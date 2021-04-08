@@ -8,32 +8,23 @@ from random import shuffle
 
 
 PRONOUNS_CA = {
-    'male': ['ele', "lo", "dele", "nele", "seu", "eles", "seus", "deles",
-             "neles"],
-    'female': ['ela', "la", "dela", "nela", "sua", "elas", "suas", "delas",
-               "nelas"],
-    'first': ['eu', 'me', 'mim', 'nós', "comigo", "meu", "minha", "meus",
-              "minhas"],
-    'neutral': ["tu", "te", "ti", "lhe", "contigo", "consigo", "si"],
-    'plural': ['eles', 'elas', "vós", "vocês", "lhes", "los", "las",
-               "neles", "nelas", "convosco", "conosco", "connosco", "teus",
-               "tuas", "seus", "suas", "nossos", "vossos", "nossas", "vossas"]
+  'male': ['ello', "lo", 'ellos', "los"],
+    'female': ['ella', "la", 'ellas', "las"],
+      'first': ['yo', 'me', 'mí', 'mío', "mía", "meu"],
+    'neutral': ["tú", "vos", "te", "le", "se", "l'", "él"],
+    'plural': ['nosotras', 'nosotros', 'nuestros', 'nuestras', 'vuestro',
+               'vuestra', "ellos", "ellas"]
 }
 
 # special cases, word2gender mappings
 GENDERED_WORDS_CA = {
-    "female": ["mãe", "irmã", "tia", "amiga", "prima", "namorada", "mulher",
-               "mulheres", "rapariga", "raparigas", "gaja", "gajas", "moça",
-               "moças", "elas", "suas"],
-    "male": ["pai", "irmão", "tio", "amigo", "primo", "namorado", "homem",
-             "homens", "rapaz", "rapazes", "gajo", "gajos", "moço", "moços",
-             "eles", "seus"]
+    "female": [],
+    "male": []
 }
 
 # context rules for gender
-MALE_DETERMINANTS_CA = ["o", "os", "este", "estes", "esse", "esses"]
-FEMALE_DETERMINANTS_CA = ["a", "as", "estas", "estas", "essa", "essas"]
-
+MALE_DETERMINANTS_CA = ["lo", "los", "ello", "ellos"]
+FEMALE_DETERMINANTS_CA = ["la", "las", "ella", "ellas"]
 
 def train_ca_tagger(path):
     nltk.download('cess_cat')
