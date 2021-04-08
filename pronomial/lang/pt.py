@@ -6,7 +6,8 @@ import nltk
 from string import punctuation
 from random import shuffle
 
-CATEGORY_PT = {
+
+PRONOUNS_PT = {
     'male': ['ele', "lo", "dele", "nele", "seu", "eles", "seus", "deles",
              "neles"],
     'female': ['ela', "la", "dela", "nela", "sua", "elas", "suas", "delas",
@@ -19,12 +20,7 @@ CATEGORY_PT = {
                "tuas", "seus", "suas", "nossos", "vossos", "nossas", "vossas"]
 }
 
-
-# word rules for gender
-_FEMALE_ENDINGS_PT = ["a", "as"]
-_MALE_ENDINGS_PT = ["o", "os"]
-
-# special cases, word lookup for words not covered by above rule
+# special cases, word2gender mappings
 GENDERED_WORDS_PT = {
     "female": ["mãe", "irmã", "tia", "amiga", "prima", "namorada", "mulher",
                "mulheres", "rapariga", "raparigas", "gaja", "gajas", "moça",
@@ -163,6 +159,11 @@ def pos_tag_pt(tokens):
     if isinstance(tokens, str):
         tokens = word_tokenize(tokens)
     return _POSTAGGER.tag(tokens)
+
+
+# word rules for gender
+_FEMALE_ENDINGS_PT = ["a", "as"]
+_MALE_ENDINGS_PT = ["o", "os"]
 
 
 def predict_gender_pt(word, text=""):

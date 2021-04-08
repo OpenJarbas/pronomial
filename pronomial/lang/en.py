@@ -1,7 +1,7 @@
 from nltk import pos_tag as _ptag
 from nltk.tokenize import word_tokenize
 
-CATEGORY_EN = {
+PRONOUNS_EN = {
     'male': ['he', 'him', 'himself', 'his'],
     'female': ['she', 'her', 'herself', 'hers'],
     'first': ['i', 'me', 'my', 'mine', 'myself', 'we', 'us', 'our',
