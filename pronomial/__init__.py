@@ -44,6 +44,9 @@ class PronomialCoreferenceSolver:
             raise NotImplementedError
 
         tags = pos_tag(sentence, lang=lang)
+        pron_list = [p for k, p in PRONOUNS.items()]
+        flatten = lambda l: [item for sublist in l for item in sublist]
+        pron_list = flatten(pron_list)
 
         prev_names = {
             "male": [],
@@ -87,10 +90,9 @@ class PronomialCoreferenceSolver:
                     prev_names["female"].append(w)
                 if gender == "male":
                     prev_names["male"].append(w)
-            elif t in PRONOUN_TAG or any(w in items
+            elif (t in PRONOUN_TAG and w.lower() in pron_list) or any(w in items
                                          for k, items in PRONOUNS.items()):
                 w = w.lower()
-
                 if w in PRONOUNS["male"]:
                     if prev_names["male"]:
                         candidates.append((idx, w, prev_names["male"][idz]))
