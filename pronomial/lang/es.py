@@ -7,23 +7,54 @@ from string import punctuation
 from random import shuffle
 
 PRONOUNS_ES = {
-    'male': ['ello', "lo", 'ellos', "los"],
-    'female': ['ella', "la", 'ellas', "las"],
-    'first': ['yo', 'me', 'mí', 'mío', "mía"],
-    'neutral': ["tú", "vos", "te", "le", "se", "l'", "él"],
-    'plural': ['nosotras', 'nosotros', 'nuestros', 'nuestras', 'vuestro',
-               'vuestra', "ellos", "ellas"]
+    'male': ['el', "los", 'ello', 'vosotros', 'nosotros', 'este', 'ese',
+             'aquel','uno', 'alguno', 'ninguno', 'poco', 'escaso', 'mucho',
+             'demasiado', 'todo', 'otro', 'mismo', 'tanto', 'tan', 'mío',
+             'tuyo', 'suyo'],
+    'female': ['la', "las", 'ella', 'vosotras', 'nosotras','esta', 'esa',
+               'aquella', 'una', 'alguna', 'ninguna', 'poca', 'escasa',
+               'mucha', 'demasiada', 'toda', 'otra', 'misma', 'tanta',
+               'alguien', 'nadie', 'cualquiera', 'quienquiera', 'demás',
+               'mía', 'tuya', 'suya'],
+    'first': ['yo', 'me', 'mí', 'mío', 'conmigo', 'nos', 'míos', 'mías',
+              'nuestro', 'nuestra',''],
+    'neutral': ['tú', 'vos', 'usted', 'le', 'se', 'te', 'mí', 'conmigo',
+                'esto', 'eso', 'aquello', 'lo', 'cuál', 'cuánto', 'qué',
+                'cómo', 'quién', 'quiénes', 'uno', 'algo', 'nada', 'poco',
+                'escaso', 'mucho', 'demasiado', 'todo', 'otro', 'mismo',
+                'tanto', 'os', 'que', 'cual', 'quien', 'cuyo', 'donde'],
+    'plural': ['nosotras', 'nosotros', 'nuestros', 'nuestras', 'vuestros',
+               'vuestras', 'suyo', 'vosotros', 'vosotras', 'ellos', 'ellas',
+               'estos', 'esos', 'aquellos','estas', 'esas', 'aquellas',
+               'unos', 'algunos', 'ningunos', 'pocos', 'escasos', 'muchos',
+               'demasiados', 'todos', 'varios', 'otros', 'mismos', 'tantos',
+               'unas', 'algunas', 'ningunas', 'pocas', 'escasas', 'muchas',
+               'demasiadas', 'todas', 'varias', 'otras', 'mismas', 'tantas',
+               'cualquiera', 'quienquiera', 'demás', 'ustedes', 'mis', 'tus',
+               'sus']
 }
 
 # special cases, word2gender mappings
 GENDERED_WORDS_ES = {
-    "female": [],
-    "male": []
+    "female": ['mamá', 'mamás', 'madre', 'madres', 'mujer', 'mujeres', 'tía',
+               'tías', 'prima', 'primas', 'chica', 'chicas', 'hermana',
+               'hermanas', 'sobrina', 'sobrinas', 'nieta', 'nietas'],
+    "male": ['papá', 'papás', 'padre', 'padres', 'hombre', 'hombres', 'tío',
+               'tíos', 'primo', 'primos', 'chico', 'chicos', 'hermano',
+               'hermanos', 'sobrino', 'sobrinos', 'nieto', 'nietos']
 }
 
 # context rules for gender
-MALE_DETERMINANTS_ES = ["lo", "los", "ello", "ellos"]
-FEMALE_DETERMINANTS_ES = ["la", "las", "ella", "ellas"]
+MALE_DETERMINANTS_ES = ['el', "los", 'ello', 'vosotros', 'nosotros', 'este',
+                        'ese', 'aquel','uno', 'alguno', 'ninguno', 'poco',
+                        'escaso', 'mucho', 'demasiado', 'todo', 'otro',
+                        'mismo', 'tanto', 'tan', 'mío', 'tuyo', 'suyo',
+                        ]
+FEMALE_DETERMINANTS_ES = ['la', "las", 'ella', 'vosotras', 'nosotras','esta',
+                         'esa', 'aquella', 'una', 'alguna', 'ninguna', 'poca',
+                         'escasa', 'mucha', 'demasiada', 'toda', 'otra',
+                         'misma', 'tanta', 'alguien', 'nadie', 'cualquiera',
+                         'quienquiera', 'demás', 'mía', 'tuya', 'suya']
 
 
 def train_es_tagger(path):
