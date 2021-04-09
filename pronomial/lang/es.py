@@ -7,17 +7,17 @@ from string import punctuation
 from random import shuffle
 
 PRONOUNS_ES = {
-    'male': ['el', "los", 'ello', 'vosotros', 'nosotros', 'este', 'ese',
+    'male': ['el', "los", 'ello', 'vuestro', 'nuestro', 'este', 'ese',
              'aquel','uno', 'alguno', 'ninguno', 'poco', 'escaso', 'mucho', 
              'demasiado', 'todo', 'otro', 'mismo', 'tanto', 'tan', 'mío',
              'tuyo', 'suyo'],
-    'female': ['la', "las", 'ella', 'vosotras', 'nosotras','esta', 'esa',
+    'female': ['la', "las", 'ella', 'vuestra', 'nuestra','esta', 'esa',
                'aquella', 'una', 'alguna', 'ninguna', 'poca', 'escasa', 
                'mucha', 'demasiada', 'toda', 'otra', 'misma', 'tanta',
                'alguien', 'nadie', 'cualquiera', 'quienquiera', 'demás',
                'mía', 'tuya', 'suya'],
     'first': ['yo', 'me', 'mí', 'mío', 'conmigo', 'nos', 'míos', 'mías',
-              'nuestro', 'nuestra',''],
+              'nuestro', 'nuestra', 'nosotros'],
     'neutral': ['tú', 'vos', 'usted', 'le', 'se', 'te', 'mí', 'conmigo',
                 'esto', 'eso', 'aquello', 'lo', 'cuál', 'cuánto', 'qué', 
                 'cómo', 'quién', 'quiénes', 'uno', 'algo', 'nada', 'poco',
