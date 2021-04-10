@@ -16,6 +16,9 @@ WITH_FOLLOWUP_EN = ["him", "her", "them"]
 THAT_EN = ["that"]
 THAT_FOLLOWUP_EN = ["he", "she", "they"]
 
+IN_EN = ["in", "into"]
+IN_FOLLOWUP_EN = ["his", "her", "their"]
+
 PRONOUN_TAG_EN = ['PRP', 'PRP$', 'WP', 'WP$']
 NOUN_TAG_EN = ['NN', 'NNP']
 JJ_TAG_EN = ['JJ']
@@ -23,7 +26,7 @@ PLURAL_NOUN_TAG_EN = ['NNS', 'NNPS']
 SUBJ_TAG_EN = ["nsubj", "dobj"]
 
 NEUTRAL_WORDS_EN = ["in"]  # if word before Noun -> neutral not male nor female
-SUBJ_INDICATORS_EN = ["his", "and"]  # if in list -> use last verb subject Noun
+SUBJ_INDICATORS_EN = ["his", "and"]  # use verb subject Noun
 
 NAME_JOINER_EN = " and "
 

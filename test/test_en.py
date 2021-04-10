@@ -1,5 +1,5 @@
 import unittest
-from pronomial import replace_corefs
+from pronomial import replace_corefs, detect_nouns, score_corefs, word_tokenize
 
 
 class TestCorefEN(unittest.TestCase):
@@ -183,6 +183,18 @@ class TestCorefEN(unittest.TestCase):
             "Chris is very handsome . Chris is Australian . Elsa lives in Arendelle . Chris likes Elsa ."
         )
 
+    def test_in(self):
+        # "into/in his/her/their" will select first male/female/plural noun
+        # instead of last
+        self.assertEqual(
+            replace_corefs("One night, Michael caught Tom in his office"),
+            "One night , Michael caught Tom in Michael office"
+        )
+        self.assertEqual(
+            replace_corefs("One night, Michael caught Tom breaking into his office"),
+            "One night , Michael caught Tom breaking into Michael office"
+        )
+
     def test_with(self):
         # "with her/him/them" will select first male/female/plural noun
         # instead of last seen
@@ -254,3 +266,26 @@ class TestCorefEN(unittest.TestCase):
             "A second child was stillborn in November 2009 , causing Sam to miss Bristol City 's match against Nottingham Forest . "
             "City manager Gary Johnson dedicated their equalising goal in the match to Sproule , Sproule had sent a message of support to Johnson teammates .")
             #  "... causing Sproule to miss ... to Sproule teammates"
+
+    def test_detect_nouns_en(self):
+        tokens = ['London', 'has', 'been', 'a', 'major', 'settlement', 'for', 'two', 'millennia', '.', 'It', 'was', 'founded', 'by', 'the', 'Romans', ',', 'who', 'named', 'it', 'Londinium', '.']
+        self.assertEqual(
+            detect_nouns(tokens, lang="en"),
+            {'female': [],
+             'first': [],
+             'male': [0, 20],
+             'neutral': [0, 5, 8, 20],
+             'plural': [15],
+             'subject': [0, 5, 8, 20],
+             'verb_subject': [0],
+             "tokens": tokens})
+        self.assertEqual(
+            detect_nouns(tokens, lang="en", return_idx=False),
+            {'female': [],
+             'first': [],
+             'male': ['London', 'Londinium'],
+             'neutral': ['London', 'settlement', 'millennia', 'Londinium'],
+             'plural': ['Romans'],
+             'subject': ['London', 'settlement', 'millennia', 'Londinium'],
+             'verb_subject': ['London'],
+             "tokens": tokens})
