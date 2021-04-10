@@ -18,6 +18,17 @@ class TestCorefEN(unittest.TestCase):
                            "her debts"),
             "Bob threatened to kill Alice to make Alice pay Alice debts"
         )
+        self.assertEqual(
+            replace_corefs(
+                "Janet has a husband, Bob, and one son, Sam. "
+                "A second child was stillborn in November 2009, causing her "
+                "to miss Bristol City's match against Nottingham Forest. "
+                "City manager Gary Johnson dedicated their equalising goal "
+                "in the match to Janet, who had sent a message of support to her teammates."),
+            "Janet has a husband , Bob , and one son , Sam . "
+            "A second child was stillborn in November 2009 , causing Janet to miss Bristol City 's match against Nottingham Forest . "
+            "City manager Gary Johnson dedicated their equalising goal in the match to Janet , "
+            "Janet had sent a message of support to Janet teammates .")
 
     def test_male(self):
         self.assertEqual(
@@ -218,6 +229,22 @@ class TestCorefEN(unittest.TestCase):
             "One night , Michael caught Tom breaking into Michael office to steal drugs , and Michael used this information to blackmail Lisa into marrying Tom ."
             # ... blackmail Lisa into marrying Michael ."
         )
+
+        # NOTE Sproule is misclassified as female
+        self.assertEqual(
+            replace_corefs(
+                "Janet has a husband, Sproule, and one son, Sam. "
+                "A second child was stillborn in November 2009, causing her "
+                "to miss Bristol City's match against Nottingham Forest. "
+                "City manager Gary Johnson dedicated their equalising goal "
+                "in the match to Janet, who had sent a message of support to her teammates."),
+            "Janet has a husband , Sproule , and one son , Sam . "
+            "A second child was stillborn in November 2009 , causing Sproule to miss Bristol City 's match against Nottingham Forest . "
+            "City manager Gary Johnson dedicated their equalising goal in the match to Janet , "
+            "Janet had sent a message of support to Janet teammates .")
+        #  "... causing Janet to miss ..."
+
+        # "his" and "him" are not properly replaced because Sproule is misclassified as female
         self.assertEqual(
             replace_corefs(
                 "Sproule has a wife, Janet, and one son, Sam. "
@@ -226,4 +253,4 @@ class TestCorefEN(unittest.TestCase):
             "Sproule has a wife , Janet , and one son , Sam . "
             "A second child was stillborn in November 2009 , causing Sam to miss Bristol City 's match against Nottingham Forest . "
             "City manager Gary Johnson dedicated their equalising goal in the match to Sproule , Sproule had sent a message of support to Johnson teammates .")
-            #  "... causing Sproule to miss ..."
+            #  "... causing Sproule to miss ... to Sproule teammates"
