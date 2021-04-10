@@ -22,6 +22,8 @@ JJ_TAG_EN = ['JJ']
 PLURAL_NOUN_TAG_EN = ['NNS', 'NNPS']
 SUBJ_TAG_EN = ["nsubj", "dobj"]
 
+NEUTRAL_WORDS_EN = ["in"]  # if word before Noun -> neutral not male nor female
+
 GENDERED_WORDS_EN = {
     "female": ["mom", "mother", "woman", "women", "aunt", "girl", "girls",
                "sister", "sisters", "mothers"],

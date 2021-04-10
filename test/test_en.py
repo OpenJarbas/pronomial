@@ -20,6 +20,11 @@ class TestCorefEN(unittest.TestCase):
 
     def test_male(self):
         self.assertEqual(
+            replace_corefs("Joe was talking to Bob and told him to go home "
+                           "because he was drunk"),
+            "Joe was talking to Bob and told Bob to go home because Bob was drunk"
+        )
+        self.assertEqual(
             replace_corefs("Jack is one of the top candidates in "
                            "the elections. His ideas are unique compared to "
                            "Bob's."),
@@ -127,13 +132,21 @@ class TestCorefEN(unittest.TestCase):
             "Turn on the light and change light to blue"
         )
 
-    def test_ambiguous(self):
-        # understandable mistakes
+    def test_mixed(self):
+        self.assertEqual(
+            replace_corefs("My sister has a dog, She loves him!"),
+            "My sister has a dog , sister loves dog !"
+        )
+
+    def test_neutral_postag(self):
+        # in {noun}-> in == IN -> {noun} == neutral
+
+        # "Arendelle" is recognized as a location because of "in", otherwise
+        # it would be tagged as a female name and be used instead of Elsa
         self.assertEqual(
             replace_corefs(
                 "Chris is very handsome. He is Australian. Elsa lives in Arendelle. He likes her."),
-            "Chris is very handsome . Chris is Australian . Elsa lives in Arendelle . Chris likes Arendelle ."
-            # "Chris is very handsome . Chris is Australian . Elsa lives in Arendelle . Chris likes Elsa ."
+            "Chris is very handsome . Chris is Australian . Elsa lives in Arendelle . Chris likes Elsa ."
         )
 
     def test_with(self):

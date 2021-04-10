@@ -12,11 +12,13 @@ class PronomialCoreferenceSolver:
         PLURAL_NOUN_TAG = ['NOUN']
         SUBJ_TAG = ['NOUN']
         WITH = WITH_FOLLOWUP = THAT = THAT_FOLLOWUP = []
+        NEUTRAL_WORDS = []
 
         if lang.startswith("en"):
             from pronomial.lang.en import NOUN_TAG_EN, PLURAL_NOUN_TAG_EN, \
                 PRONOUNS_EN, PRONOUN_TAG_EN, SUBJ_TAG_EN, JJ_TAG_EN, WITH_EN,\
-                GENDERED_WORDS_EN, WITH_FOLLOWUP_EN, THAT_EN, THAT_FOLLOWUP_EN
+                GENDERED_WORDS_EN, WITH_FOLLOWUP_EN, THAT_EN, \
+                THAT_FOLLOWUP_EN, NEUTRAL_WORDS_EN
             GENDERED_WORDS = GENDERED_WORDS_EN
             NOUN_TAG = NOUN_TAG_EN
             SUBJ_TAG = SUBJ_TAG_EN
@@ -28,6 +30,7 @@ class PronomialCoreferenceSolver:
             WITH_FOLLOWUP = WITH_FOLLOWUP_EN
             THAT = THAT_EN
             THAT_FOLLOWUP = THAT_FOLLOWUP_EN
+            NEUTRAL_WORDS = NEUTRAL_WORDS_EN
         elif lang.startswith("pt"):
             from pronomial.lang.pt import PRONOUNS_PT, GENDERED_WORDS_PT
             GENDERED_WORDS = GENDERED_WORDS_PT
@@ -69,18 +72,21 @@ class PronomialCoreferenceSolver:
                 idz = 0
 
             if t in NOUN_TAG:
-                gender = predict_gender(w, prev_w, lang=lang)
-                if w in PRONOUNS["female"] or\
-                        w.lower() in GENDERED_WORDS["female"]:
-                    prev_names["female"].append(w)
-                elif w in PRONOUNS["male"] or \
-                        w.lower() in GENDERED_WORDS["male"]:
-                    prev_names["male"].append(w)
-                elif w[0].isupper() or prev_t in ["DET"]:
-                    prev_names[gender].append(w)
-                prev_names["neutral"].append(w)
-                prev_names["subject"].append(w)
-                prev_names["subject_gender"] = gender
+                if prev_w in NEUTRAL_WORDS:
+                    prev_names["neutral"].append(w)
+                else:
+                    gender = predict_gender(w, prev_w, lang=lang)
+                    if w in PRONOUNS["female"] or\
+                            w.lower() in GENDERED_WORDS["female"]:
+                        prev_names["female"].append(w)
+                    elif w in PRONOUNS["male"] or \
+                            w.lower() in GENDERED_WORDS["male"]:
+                        prev_names["male"].append(w)
+                    elif w[0].isupper() or prev_t in ["DET"]:
+                        prev_names[gender].append(w)
+                    prev_names["neutral"].append(w)
+                    prev_names["subject"].append(w)
+                    prev_names["subject_gender"] = gender
             elif t in SUBJ_TAG:
                 prev_names["subject"].append(w)
                 gender = predict_gender(w, prev_w, lang=lang)
