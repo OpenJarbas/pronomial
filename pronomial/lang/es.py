@@ -17,7 +17,7 @@ PRONOUNS_ES = {
                'alguien', 'nadie', 'cualquiera', 'quienquiera', 'demás',
                'mía', 'tuya', 'suya'],
     'first': ['yo', 'me', 'mí', 'mío', 'conmigo', 'nos', 'míos', 'mías',
-              'nuestro', 'nuestra',''],
+              'nuestro', 'nuestra'],
     'neutral': ['tú', 'vos', 'usted', 'le', 'se', 'te', 'mí', 'conmigo',
                 'esto', 'eso', 'aquello', 'lo', 'cuál', 'cuánto', 'qué',
                 'cómo', 'quién', 'quiénes', 'uno', 'algo', 'nada', 'poco',
