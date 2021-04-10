@@ -7,23 +7,37 @@ from string import punctuation
 from random import shuffle
 
 PRONOUNS_CA = {
-    'male': ['ello', "lo", 'ellos', "los"],
-    'female': ['ella', "la", 'ellas', "las"],
-    'first': ['yo', 'me', 'mí', 'mío', "mía"],
-    'neutral': ["tú", "vos", "te", "le", "se", "l'", "él"],
-    'plural': ['nosotras', 'nosotros', 'nuestros', 'nuestras', 'vuestro',
-               'vuestra', "ellos", "ellas"]
+    'male': ['ell', '-lo', '-los', 'el', 'aquest', 'aquell', 'tot', 'ningú',
+             'qui'],
+    'female': ['ella', '-la', '-les', 'la', 'aquesta', 'aquella', 'tota', 
+              'ninguna', 'quina'],
+    'first': ['jo', 'mi', 'nosaltres', 'ens', 'em', 'en', 'ho', 'hi', 'li'],
+    'neutral': ['tu', 'vosaltres', 'vostè', 'vós', 'em', 'et', 'es', 'ens', 
+                'us', 'li', 'en', 'ho', 'hi', "m'", "t'", "s'", "l'", "n'",
+                '-me', '-te', '-se', '-nos', '-li', '-ho', '-hi', "'m", "'t",
+                "'ns", "'s", "'l", "-'ls", "'n", 'això', 'allò', 'aquí', 
+                'allà', 'allí', 'algú', 'res', 'cadascú', 'qui', 'què', 'com',
+                'quan', 'quant'],
+    'plural': ['nosaltres', 'vosaltres', 'ells', 'elles', 'vostès', '-los',
+               '-les', "'ns", "'ls", 'ens', "us", 'les', 'els', '-nos']
 }
 
 # special cases, word2gender mappings
 GENDERED_WORDS_CA = {
-    "female": [],
-    "male": []
+    "female": ['mamà', 'mamàs', 'mare', 'mares', 'dona', 'dones', 'tia',
+               'ties', 'tieta', 'tietes', 'cosina', 'cosines', 'noia', 
+               'noies', 'germana', 'germanes', 'neboda', 'nebodes', 'néta',
+               'nétes'],
+    "male": ['papà', 'pare', 'papàs', 'papà', 'home', 'homes', 'oncle', 
+             'oncles', 'cosí', 'cosins', 'noi', 'nois', 'germà', 'germans',
+             'nebot', 'nebots', 'nét', 'néts']
 }
 
 # context rules for gender
-MALE_DETERMINANTS_CA = ["lo", "los", "ello", "ellos"]
-FEMALE_DETERMINANTS_CA = ["la", "las", "ella", "ellas"]
+MALE_DETERMINANTS_CA = ['ell', '-lo', '-los', 'el', 'aquest', 'aquell', 'tot',
+                        'ningú', 'qui']
+FEMALE_DETERMINANTS_CA = ['ella', '-la', '-les', 'la', 'aquesta', 'aquella', 
+                          'tota', 'ninguna', 'quina']
 
 
 def train_ca_tagger(path):
@@ -390,8 +404,9 @@ def pos_tag_ca(tokens):
 
 
 # word rules for gender
-_FEMALE_ENDINGS_CA = ["a", "as"]
-_MALE_ENDINGS_CA = ["o", "os"]
+# in catalan, plural for words ending in "a" or "e" ends with "es"
+_FEMALE_ENDINGS_CA = ["a"]
+#_MALE_ENDINGS_CA = ["e"]
 
 
 def predict_gender_ca(word, text=""):
@@ -400,14 +415,18 @@ def predict_gender_ca(word, text=""):
     words = text.lower().split(" ")
     for idx, w in enumerate(words):
         if w == word and idx != 0:
-            # in portuguese usually the previous word (a determinant)
+            # in catalan usually the previous word (a determinant)
             # assigns gender to the next word
             previous = words[idx - 1].lower()
             if previous in MALE_DETERMINANTS_CA:
                 return "male"
             elif previous in FEMALE_DETERMINANTS_CA:
                 return "female"
-
+            # catalan "weak pronouns" can also determine the gender 
+            if word[-4:] or word[-3:] in MALE_DETERMINANTS_CA:
+                return "male"
+            elif word[-3:] or word[-3:] in FEMALE_DETERMINANTS_CA:
+                return "female"
     # get gender using only the individual word
     # see if this word has the gender defined
     if word in GENDERED_WORDS_CA["male"]:
@@ -419,12 +438,11 @@ def predict_gender_ca(word, text=""):
         return "male"
     if singular in GENDERED_WORDS_CA["male"]:
         return "female"
-    # in portuguese the last vowel usually defines the gender of a word
-    # the gender of the determinant takes precedence over this rule
+    # in catalan, if the last vowel is an "a" usually is a female word
+    # but if it ends in any other letter, usually is a male word
     for end_str in _FEMALE_ENDINGS_CA:
         if word.endswith(end_str):
             return "female"
-    for end_str in _MALE_ENDINGS_CA:
-        if word.endswith(end_str):
+        else:
             return "male"
     return None
