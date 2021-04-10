@@ -22,6 +22,11 @@ JJ_TAG_EN = ['JJ']
 PLURAL_NOUN_TAG_EN = ['NNS', 'NNPS']
 SUBJ_TAG_EN = ["nsubj", "dobj"]
 
+NEUTRAL_WORDS_EN = ["in"]  # if word before Noun -> neutral not male nor female
+SUBJ_INDICATORS_EN = ["his", "and"]  # if in list -> use last verb subject Noun
+
+NAME_JOINER_EN = " and "
+
 GENDERED_WORDS_EN = {
     "female": ["mom", "mother", "woman", "women", "aunt", "girl", "girls",
                "sister", "sisters", "mothers"],
@@ -35,19 +40,33 @@ def pos_tag_en(tokens):
         tokens = word_tokenize(tokens)
 
     postagged = _ptag(tokens)
+
     # HACK this fixes some know failures from postag
     # this is not sustainable but important cases can be added at any time
     # PRs + unittests welcome!
     ONOFF_VERBS = ["turn"]
     ON_OFF = ["on", "off"]
+    IT_VERBS = ["change"]
     for idx, (w, t) in enumerate(postagged):
         next_w, next_t = postagged[idx + 1] if \
                              idx < len(postagged) - 1 else ("", "")
+
+        # "turn on" falsely detected as ('Turn', 'NN'), ('on', 'IN')
         if w.lower() in ONOFF_VERBS and next_w.lower() in ON_OFF:
             # turn on/off
             if t == "NN":
                 postagged[idx] = (w, "VB")
                 postagged[idx + 1] = (next_w, "RP")
+
+        # "change it" falsely detected as ('change', 'NN'), ('it', 'PRP')
+        elif w.lower() in IT_VERBS and next_w.lower() == "it":
+            if t == "NN":
+                postagged[idx] = (w, "VB")
+                postagged[idx + 1] = (next_w, "PRP")
     # END HACK
 
     return postagged
+
+
+def is_plural_en(text):
+    return text.endswith("s")

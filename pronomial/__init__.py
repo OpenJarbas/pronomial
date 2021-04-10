@@ -1,4 +1,4 @@
-from pronomial.utils import predict_gender, pos_tag, word_tokenize
+from pronomial.utils import predict_gender, pos_tag, word_tokenize, is_plural
 
 
 class PronomialCoreferenceSolver:
@@ -12,11 +12,15 @@ class PronomialCoreferenceSolver:
         PLURAL_NOUN_TAG = ['NOUN']
         SUBJ_TAG = ['NOUN']
         WITH = WITH_FOLLOWUP = THAT = THAT_FOLLOWUP = []
+        NEUTRAL_WORDS = []
+        SUBJ_INDICATORS = []
+        NAME_JOINER = "+"  # symbol used to merge Nouns to replace plurals
 
         if lang.startswith("en"):
             from pronomial.lang.en import NOUN_TAG_EN, PLURAL_NOUN_TAG_EN, \
                 PRONOUNS_EN, PRONOUN_TAG_EN, SUBJ_TAG_EN, JJ_TAG_EN, WITH_EN,\
-                GENDERED_WORDS_EN, WITH_FOLLOWUP_EN, THAT_EN, THAT_FOLLOWUP_EN
+                GENDERED_WORDS_EN, WITH_FOLLOWUP_EN, THAT_EN, \
+                THAT_FOLLOWUP_EN, NEUTRAL_WORDS_EN, SUBJ_INDICATORS_EN, NAME_JOINER_EN
             GENDERED_WORDS = GENDERED_WORDS_EN
             NOUN_TAG = NOUN_TAG_EN
             SUBJ_TAG = SUBJ_TAG_EN
@@ -28,6 +32,9 @@ class PronomialCoreferenceSolver:
             WITH_FOLLOWUP = WITH_FOLLOWUP_EN
             THAT = THAT_EN
             THAT_FOLLOWUP = THAT_FOLLOWUP_EN
+            NEUTRAL_WORDS = NEUTRAL_WORDS_EN
+            SUBJ_INDICATORS = SUBJ_INDICATORS_EN
+            NAME_JOINER = NAME_JOINER_EN
         elif lang.startswith("pt"):
             from pronomial.lang.pt import PRONOUNS_PT, GENDERED_WORDS_PT
             GENDERED_WORDS = GENDERED_WORDS_PT
@@ -55,7 +62,7 @@ class PronomialCoreferenceSolver:
             "neutral": [],
             "plural": [],
             "subject": [],
-            "subject_gender": "neutral"
+            "verb_subject": []
         }
         candidates = []
 
@@ -64,27 +71,32 @@ class PronomialCoreferenceSolver:
             prev_w, prev_t = tags[idx - 1] if idx > 0 else ("", "")
             idz = -1
             if prev_w.lower() in WITH and w.lower() in WITH_FOLLOWUP:
-                idz = 0
+                idz = -2
             elif prev_w.lower() in THAT and w.lower() in THAT_FOLLOWUP:
-                idz = 0
+                idz = -2
 
             if t in NOUN_TAG:
-                gender = predict_gender(w, prev_w, lang=lang)
-                if w in PRONOUNS["female"] or\
-                        w.lower() in GENDERED_WORDS["female"]:
-                    prev_names["female"].append(w)
-                elif w in PRONOUNS["male"] or \
-                        w.lower() in GENDERED_WORDS["male"]:
-                    prev_names["male"].append(w)
-                elif w[0].isupper() or prev_t in ["DET"]:
-                    prev_names[gender].append(w)
-                prev_names["neutral"].append(w)
-                prev_names["subject"].append(w)
-                prev_names["subject_gender"] = gender
+                if prev_w in NEUTRAL_WORDS:
+                    prev_names["neutral"].append(w)
+                else:
+                    gender = predict_gender(w, prev_w, lang=lang)
+                    if w in PRONOUNS["female"] or\
+                            w.lower() in GENDERED_WORDS["female"]:
+                        prev_names["female"].append(w)
+                    elif w in PRONOUNS["male"] or \
+                            w.lower() in GENDERED_WORDS["male"]:
+                        prev_names["male"].append(w)
+                    elif w[0].isupper() or prev_t in ["DET"]:
+                        prev_names[gender].append(w)
+                    prev_names["neutral"].append(w)
+                    prev_names["subject"].append(w)
+
+                if next_t.startswith("V") and not prev_t.startswith("V"):
+                    prev_names["verb_subject"] = w
+
             elif t in SUBJ_TAG:
                 prev_names["subject"].append(w)
                 gender = predict_gender(w, prev_w, lang=lang)
-                prev_names["subject_gender"] = gender
                 prev_names["neutral"].append(w)
                 if gender == "female":
                     prev_names["female"].append(w)
@@ -94,36 +106,80 @@ class PronomialCoreferenceSolver:
                                          for k, items in PRONOUNS.items()):
                 w = w.lower()
                 if w in PRONOUNS["male"]:
-                    if prev_names["male"]:
-                        candidates.append((idx, w, prev_names["male"][idz]))
+                    # give preference to verb subjects
+                    n = prev_names["male"]
+                    if (w in SUBJ_INDICATORS or prev_w in SUBJ_INDICATORS) and \
+                            prev_names["verb_subject"]:
+                        n = [_ for _ in prev_names["male"]
+                             if _ in prev_names["verb_subject"]] or n
+                    if n:
+                        if abs(idz) > len(n):
+                            idz = 0
+                        candidates.append((idx, w, n[idz]))
                     elif prev_names["subject"]:
+                        if abs(idz) > len(prev_names["subject"]):
+                            idz = 0
                         candidates.append((idx, w, prev_names["subject"][idz]))
                 elif w in PRONOUNS["female"]:
-                    if prev_names["female"]:
-                        candidates.append((idx, w, prev_names["female"][idz]))
+                    # give preference to verb subjects
+                    n = prev_names["female"]
+                    if (w in SUBJ_INDICATORS or prev_w in SUBJ_INDICATORS) and prev_names["verb_subject"]:
+                        n = [_ for _ in prev_names["female"]
+                             if _ in prev_names["verb_subject"]] or n
+                    if n:
+                        if abs(idz) > len(n):
+                            idz = 0
+                        candidates.append((idx, w, n[idz]))
                     elif prev_names["subject"]:
+                        if abs(idz) > len(prev_names["subject"]):
+                            idz = 0
                         candidates.append((idx, w, prev_names["subject"][idz]))
                 elif w in PRONOUNS["neutral"]:
-                    if prev_names["neutral"]:
-                        candidates.append((idx, w, prev_names["neutral"][0]))
+                    # give preference to verb subjects
+                    n = prev_names["neutral"]
+                    if prev_names["verb_subject"]:
+                        n = [_ for _ in prev_names["neutral"]
+                             if _ in prev_names["verb_subject"]] or n
+                    if n:
+                        if abs(idz) > len(n):
+                            idz = 0
+                        candidates.append((idx, w, n[idz]))
                     elif prev_names["subject"]:
+                        if abs(idz) > len(prev_names["subject"]):
+                            idz = 0
                         candidates.append((idx, w, prev_names["subject"][idz]))
-                else:
-                    if w in PRONOUNS["plural"] and prev_names["plural"]:
+                elif w in PRONOUNS["plural"]:
+                    plural_subjs = [_ for _ in prev_names["subject"] if
+                                    is_plural(_, lang)]
+                    names = prev_names["male"] + prev_names["female"]
+                    if prev_names["plural"]:
+                        if abs(idz) > len(prev_names["plural"]):
+                            idz = 0
                         candidates.append((idx, w, prev_names["plural"][idz]))
-                    elif w in PRONOUNS["first"] and prev_names["first"]:
-                        candidates.append((idx, w, prev_names["first"][idz]))
-                    elif w in PRONOUNS["plural"] and prev_names["subject"]:
+                    elif plural_subjs:
+                        if abs(idz) > len(plural_subjs):
+                            idz = 0
+                        candidates.append((idx, w, plural_subjs[idz]))
+                    elif t in ["WP"] and prev_names["subject"]:
+                        if abs(idz) > len(prev_names["subject"]):
+                            idz = 0
                         candidates.append((idx, w, prev_names["subject"][idz]))
+                    elif len(names) == 2:
+                        merged_names = NAME_JOINER.join([_ for _ in names if
+                                                     _[0].isupper()])
+                        candidates.append((idx, w, merged_names))
+                else:
+                    for k, v in PRONOUNS.items():
+                        if prev_names[k] and w in v:
+                            if abs(idz) > len(prev_names[k]):
+                                idz = 0
+                            candidates.append((idx, w, prev_names[k][idz]))
                     else:
-                        for k, v in PRONOUNS.items():
-                            if prev_names[k] and w in v:
-                                candidates.append((idx, w, prev_names[k][idz]))
-                        else:
-                            if prev_names["subject"] and \
-                                    w not in PRONOUNS["first"]:
-                                candidates.append(
-                                    (idx, w, prev_names["subject"][idz]))
+                        if prev_names["subject"] and w not in PRONOUNS["first"]:
+                            if abs(idz) > len(prev_names["subject"]):
+                                idz = 0
+                            candidates.append(
+                                (idx, w, prev_names["subject"][idz]))
             elif t in PLURAL_NOUN_TAG:
                 prev_names["plural"].append(w)
                 if w[0].isupper():

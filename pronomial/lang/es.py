@@ -16,6 +16,10 @@ PRONOUNS_ES = {
                'mucha', 'demasiada', 'toda', 'otra', 'misma', 'tanta',
                'alguien', 'nadie', 'cualquiera', 'quienquiera', 'demás',
                'mía', 'tuya', 'suya'],
+               'mucha', 'demasiada', 'toda', 'otra', 'misma', 'tanta',
+               'alguien', 'nadie', 'cualquiera', 'quienquiera', 'demás',
+               'mía', 'tuya', 'suya'],
+    'first': ['yo', 'me', 'mí', 'mío', 'conmigo', 'nos', 'míos', 'mías',
     'first': ['yo', 'me', 'mí', 'mío', 'conmigo', 'nos', 'míos', 'mías',
               'nuestro', 'nuestra', 'nosotros'],
     'neutral': ['tú', 'vos', 'usted', 'le', 'se', 'te', 'mí', 'conmigo',
@@ -42,7 +46,7 @@ GENDERED_WORDS_ES = {
     "male": ['papá', 'papás', 'padre', 'padres', 'hombre', 'hombres', 'tío',
                'tíos', 'primo', 'primos', 'chico', 'chicos', 'hermano', 
                'hermanos', 'sobrino', 'sobrinos', 'nieto', 'nietos']
-}
+} 
 
 # context rules for gender
 MALE_DETERMINANTS_ES = ['el', "los", 'ello', 'vosotros', 'nosotros', 'este', 

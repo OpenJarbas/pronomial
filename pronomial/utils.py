@@ -5,7 +5,7 @@ from nltk.tokenize import word_tokenize
 import pickle
 
 from pronomial.lang.pt import pos_tag_pt
-from pronomial.lang.en import pos_tag_en
+from pronomial.lang.en import pos_tag_en, is_plural_en
 from pronomial.lang.es import pos_tag_es
 from pronomial.lang.ca import pos_tag_ca
 
@@ -75,3 +75,9 @@ def predict_gender(word, text="", lang="en"):
         gender = predict_gender_ca(word, text)
 
     return gender or GENDER.classify(_get_features(word))
+
+
+def is_plural(text, lang="en"):
+    if lang.startswith("en"):
+        return is_plural_en(text)
+    return text.endswith("s")

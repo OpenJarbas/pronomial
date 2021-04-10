@@ -6,6 +6,7 @@ class TestCorefEN(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.lang = "en"
+        self.maxDiff = None
 
     def test_female(self):
         self.assertEqual(
@@ -17,8 +18,24 @@ class TestCorefEN(unittest.TestCase):
                            "her debts"),
             "Bob threatened to kill Alice to make Alice pay Alice debts"
         )
+        self.assertEqual(
+            replace_corefs(
+                "Janet has a husband, Bob, and one son, Sam. "
+                "A second child was stillborn in November 2009, causing her "
+                "to miss Bristol City's match against Nottingham Forest. "
+                "City manager Gary Johnson dedicated their equalising goal "
+                "in the match to Janet, who had sent a message of support to her teammates."),
+            "Janet has a husband , Bob , and one son , Sam . "
+            "A second child was stillborn in November 2009 , causing Janet to miss Bristol City 's match against Nottingham Forest . "
+            "City manager Gary Johnson dedicated their equalising goal in the match to Janet , "
+            "Janet had sent a message of support to Janet teammates .")
 
     def test_male(self):
+        self.assertEqual(
+            replace_corefs("Joe was talking to Bob and told him to go home "
+                           "because he was drunk"),
+            "Joe was talking to Bob and told Bob to go home because Bob was drunk"
+        )
         self.assertEqual(
             replace_corefs("Jack is one of the top candidates in "
                            "the elections. His ideas are unique compared to "
@@ -57,6 +74,14 @@ class TestCorefEN(unittest.TestCase):
             "My neighbours just adopted a puppy . neighbours care for puppy like a baby ."
         )
 
+        # merging of previous Nouns (limited to 2 names total)
+        self.assertEqual(
+            replace_corefs("Alice invited Marcia to go with her to "
+                           "their favorite store"),
+            "Alice invited Marcia to go with Alice to Alice and Marcia "
+            "favorite store"
+        )
+
     def test_it(self):
         self.assertEqual(
             replace_corefs("My neighbors have a cat. It has a bushy tail."),
@@ -66,6 +91,12 @@ class TestCorefEN(unittest.TestCase):
             replace_corefs("Here is the book now take it."),
             "Here is the book now take book ."
         )
+        # dog -> neutral
+        self.assertEqual(
+            replace_corefs("dog is man's best friend. It is always loyal."),
+            "dog is man 's best friend . dog is always loyal ."
+        )
+        # Dog -> name (male)
         self.assertEqual(
             replace_corefs("Dog is man's best friend. It is always loyal."),
             "Dog is man 's best friend . Dog is always loyal ."
@@ -119,21 +150,37 @@ class TestCorefEN(unittest.TestCase):
         )
 
     def test_hardcoded_postag_fixes(self):
-        # failure cases
-        # pos_tag confused Turn with a name, this specific use is corrected
-        # manually when detected
+        # "turn on" falsely detected as ('Turn', 'NN'), ('on', 'IN')
+        # "change it" falsely detected as ('change', 'NN'), ('it', 'PRP')
+        # these specific cases are corrected manually when detected
         self.assertEqual(
             replace_corefs("Turn on the light and change it to blue"),
             "Turn on the light and change light to blue"
         )
 
-    def test_ambiguous(self):
-        # understandable mistakes
+    def test_mixed(self):
+        self.assertEqual(
+            replace_corefs("My sister has a dog, She loves him!"),
+            "My sister has a dog , sister loves dog !"
+        )
+        self.assertEqual(
+            replace_corefs(
+                "A short while later, Michael decided that he wanted to play a role in his son's life, and tried to get Lisa to marry him, but by this time, she wanted nothing to do with him. "
+                "Around the same time, Lisa's son Tom had returned from Vietnam with a drug habit. One night, Michael caught Tom breaking into his office to steal drugs"
+            ),
+            "A short while later , Michael decided that Michael wanted to play a role in Michael son 's life , and tried to get Lisa to marry Michael , but by this time , Lisa wanted nothing to do with Michael . "
+            "Around the same time , Lisa 's son Tom had returned from Vietnam with a drug habit . One night , Michael caught Tom breaking into Michael office to steal drugs"
+        )
+
+    def test_neutral_postag(self):
+        # in {noun}-> in == IN -> {noun} == neutral
+
+        # "Arendelle" is recognized as a location because of "in", otherwise
+        # it would be tagged as a female name and be used instead of Elsa
         self.assertEqual(
             replace_corefs(
                 "Chris is very handsome. He is Australian. Elsa lives in Arendelle. He likes her."),
-            "Chris is very handsome . Chris is Australian . Elsa lives in Arendelle . Chris likes Arendelle ."
-            # "Chris is very handsome . Chris is Australian . Elsa lives in Arendelle . Chris likes Elsa ."
+            "Chris is very handsome . Chris is Australian . Elsa lives in Arendelle . Chris likes Elsa ."
         )
 
     def test_with(self):
@@ -142,13 +189,13 @@ class TestCorefEN(unittest.TestCase):
         self.assertEqual(
             replace_corefs("Kevin invited Bob to go with him to "
                            "his favorite fishing spot"),
-            "Kevin invited Bob to go with Kevin to Bob favorite fishing spot"
+            "Kevin invited Bob to go with Kevin to Kevin favorite fishing spot"
         )
         self.assertEqual(
-            replace_corefs("Alice invited Marcia to go with her to "
-                           "their favorite store"),
-            "Alice invited Marcia to go with Alice to Marcia favorite store"
+            replace_corefs("Alice invited Marcia to go with her"),
+            "Alice invited Marcia to go with Alice"
         )
+
         self.assertEqual(
             replace_corefs("The Martians invited the Venusians to go with "
                            "them to Pluto"),
@@ -174,3 +221,36 @@ class TestCorefEN(unittest.TestCase):
             "The Martians told the Venusians that Martians used to have an ocean"
         )
 
+    def test_known_failures(self):
+        # these errors are understandable and can't really be fixed...
+        self.assertEqual(
+            replace_corefs(
+                "One night, Michael caught Tom breaking into his office to steal drugs, and he used this information to blackmail Lisa into marrying him."),
+            "One night , Michael caught Tom breaking into Michael office to steal drugs , and Michael used this information to blackmail Lisa into marrying Tom ."
+            # ... blackmail Lisa into marrying Michael ."
+        )
+
+        # NOTE Sproule is misclassified as female
+        self.assertEqual(
+            replace_corefs(
+                "Janet has a husband, Sproule, and one son, Sam. "
+                "A second child was stillborn in November 2009, causing her "
+                "to miss Bristol City's match against Nottingham Forest. "
+                "City manager Gary Johnson dedicated their equalising goal "
+                "in the match to Janet, who had sent a message of support to her teammates."),
+            "Janet has a husband , Sproule , and one son , Sam . "
+            "A second child was stillborn in November 2009 , causing Sproule to miss Bristol City 's match against Nottingham Forest . "
+            "City manager Gary Johnson dedicated their equalising goal in the match to Janet , "
+            "Janet had sent a message of support to Janet teammates .")
+        #  "... causing Janet to miss ..."
+
+        # "his" and "him" are not properly replaced because Sproule is misclassified as female
+        self.assertEqual(
+            replace_corefs(
+                "Sproule has a wife, Janet, and one son, Sam. "
+                "A second child was stillborn in November 2009, causing him to miss Bristol City's match against Nottingham Forest. "
+                "City manager Gary Johnson dedicated their equalising goal in the match to Sproule, who had sent a message of support to his teammates."),
+            "Sproule has a wife , Janet , and one son , Sam . "
+            "A second child was stillborn in November 2009 , causing Sam to miss Bristol City 's match against Nottingham Forest . "
+            "City manager Gary Johnson dedicated their equalising goal in the match to Sproule , Sproule had sent a message of support to Johnson teammates .")
+            #  "... causing Sproule to miss ... to Sproule teammates"
