@@ -6,6 +6,7 @@ class TestCorefEN(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.lang = "en"
+        self.maxDiff = None
 
     def test_female(self):
         self.assertEqual(
@@ -130,9 +131,9 @@ class TestCorefEN(unittest.TestCase):
         )
 
     def test_hardcoded_postag_fixes(self):
-        # failure cases
-        # pos_tag confused Turn with a name, this specific use is corrected
-        # manually when detected
+        # "turn on" falsely detected as ('Turn', 'NN'), ('on', 'IN')
+        # "change it" falsely detected as ('change', 'NN'), ('it', 'PRP')
+        # these specific cases are corrected manually when detected
         self.assertEqual(
             replace_corefs("Turn on the light and change it to blue"),
             "Turn on the light and change light to blue"
@@ -142,6 +143,14 @@ class TestCorefEN(unittest.TestCase):
         self.assertEqual(
             replace_corefs("My sister has a dog, She loves him!"),
             "My sister has a dog , sister loves dog !"
+        )
+        self.assertEqual(
+            replace_corefs(
+                "A short while later, Michael decided that he wanted to play a role in his son's life, and tried to get Lisa to marry him, but by this time, she wanted nothing to do with him. "
+                "Around the same time, Lisa's son Tom had returned from Vietnam with a drug habit. One night, Michael caught Tom breaking into his office to steal drugs"
+                ),
+            "A short while later , Michael decided that Michael wanted to play a role in Michael son 's life , and tried to get Lisa to marry Michael , but by this time , Lisa wanted nothing to do with Michael . "
+            "Around the same time , Lisa 's son Tom had returned from Vietnam with a drug habit . One night , Michael caught Tom breaking into Michael office to steal drugs"
         )
 
     def test_neutral_postag(self):
@@ -161,7 +170,7 @@ class TestCorefEN(unittest.TestCase):
         self.assertEqual(
             replace_corefs("Kevin invited Bob to go with him to "
                            "his favorite fishing spot"),
-            "Kevin invited Bob to go with Kevin to Bob favorite fishing spot"
+            "Kevin invited Bob to go with Kevin to Kevin favorite fishing spot"
         )
         self.assertEqual(
             replace_corefs("Alice invited Marcia to go with her to "
@@ -193,3 +202,11 @@ class TestCorefEN(unittest.TestCase):
             "The Martians told the Venusians that Martians used to have an ocean"
         )
 
+    def test_known_failures(self):
+        # these errors are understandable and can't really be fixed...
+        self.assertEqual(
+            replace_corefs(
+                "One night, Michael caught Tom breaking into his office to steal drugs, and he used this information to blackmail Lisa into marrying him."),
+            "One night , Michael caught Tom breaking into Michael office to steal drugs , and Michael used this information to blackmail Lisa into marrying Tom ."
+            # "One night , Michael caught Tom breaking into Michael office to steal drugs , and Michael used this information to blackmail Lisa into marrying Michael ."
+        )
