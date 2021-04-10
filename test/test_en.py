@@ -63,6 +63,14 @@ class TestCorefEN(unittest.TestCase):
             "My neighbours just adopted a puppy . neighbours care for puppy like a baby ."
         )
 
+        # merging of previous Nouns (limited to 2 names total)
+        self.assertEqual(
+            replace_corefs("Alice invited Marcia to go with her to "
+                           "their favorite store"),
+            "Alice invited Marcia to go with Alice to Alice and Marcia "
+            "favorite store"
+        )
+
     def test_it(self):
         self.assertEqual(
             replace_corefs("My neighbors have a cat. It has a bushy tail."),
@@ -148,7 +156,7 @@ class TestCorefEN(unittest.TestCase):
             replace_corefs(
                 "A short while later, Michael decided that he wanted to play a role in his son's life, and tried to get Lisa to marry him, but by this time, she wanted nothing to do with him. "
                 "Around the same time, Lisa's son Tom had returned from Vietnam with a drug habit. One night, Michael caught Tom breaking into his office to steal drugs"
-                ),
+            ),
             "A short while later , Michael decided that Michael wanted to play a role in Michael son 's life , and tried to get Lisa to marry Michael , but by this time , Lisa wanted nothing to do with Michael . "
             "Around the same time , Lisa 's son Tom had returned from Vietnam with a drug habit . One night , Michael caught Tom breaking into Michael office to steal drugs"
         )
@@ -173,10 +181,10 @@ class TestCorefEN(unittest.TestCase):
             "Kevin invited Bob to go with Kevin to Kevin favorite fishing spot"
         )
         self.assertEqual(
-            replace_corefs("Alice invited Marcia to go with her to "
-                           "their favorite store"),
-            "Alice invited Marcia to go with Alice to Marcia favorite store"
+            replace_corefs("Alice invited Marcia to go with her"),
+            "Alice invited Marcia to go with Alice"
         )
+
         self.assertEqual(
             replace_corefs("The Martians invited the Venusians to go with "
                            "them to Pluto"),
@@ -208,5 +216,14 @@ class TestCorefEN(unittest.TestCase):
             replace_corefs(
                 "One night, Michael caught Tom breaking into his office to steal drugs, and he used this information to blackmail Lisa into marrying him."),
             "One night , Michael caught Tom breaking into Michael office to steal drugs , and Michael used this information to blackmail Lisa into marrying Tom ."
-            # "One night , Michael caught Tom breaking into Michael office to steal drugs , and Michael used this information to blackmail Lisa into marrying Michael ."
+            # ... blackmail Lisa into marrying Michael ."
         )
+        self.assertEqual(
+            replace_corefs(
+                "Sproule has a wife, Janet, and one son, Sam. "
+                "A second child was stillborn in November 2009, causing him to miss Bristol City's match against Nottingham Forest. "
+                "City manager Gary Johnson dedicated their equalising goal in the match to Sproule, who had sent a message of support to his teammates."),
+            "Sproule has a wife , Janet , and one son , Sam . "
+            "A second child was stillborn in November 2009 , causing Sam to miss Bristol City 's match against Nottingham Forest . "
+            "City manager Gary Johnson dedicated their equalising goal in the match to Sproule , Sproule had sent a message of support to Johnson teammates .")
+            #  "... causing Sproule to miss ..."

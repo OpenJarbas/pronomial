@@ -25,6 +25,8 @@ SUBJ_TAG_EN = ["nsubj", "dobj"]
 NEUTRAL_WORDS_EN = ["in"]  # if word before Noun -> neutral not male nor female
 SUBJ_INDICATORS_EN = ["his", "and"]  # if in list -> use last verb subject Noun
 
+NAME_JOINER_EN = " and "
+
 GENDERED_WORDS_EN = {
     "female": ["mom", "mother", "woman", "women", "aunt", "girl", "girls",
                "sister", "sisters", "mothers"],
@@ -64,3 +66,7 @@ def pos_tag_en(tokens):
     # END HACK
 
     return postagged
+
+
+def is_plural_en(text):
+    return text.endswith("s")
