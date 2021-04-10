@@ -71,6 +71,12 @@ class TestCorefEN(unittest.TestCase):
             replace_corefs("Here is the book now take it."),
             "Here is the book now take book ."
         )
+        # dog -> neutral
+        self.assertEqual(
+            replace_corefs("dog is man's best friend. It is always loyal."),
+            "dog is man 's best friend . dog is always loyal ."
+        )
+        # Dog -> name (male)
         self.assertEqual(
             replace_corefs("Dog is man's best friend. It is always loyal."),
             "Dog is man 's best friend . Dog is always loyal ."

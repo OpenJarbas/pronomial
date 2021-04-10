@@ -58,7 +58,7 @@ class PronomialCoreferenceSolver:
             "neutral": [],
             "plural": [],
             "subject": [],
-            "subject_gender": "neutral"
+            "verb_subject": []
         }
         candidates = []
 
@@ -67,9 +67,9 @@ class PronomialCoreferenceSolver:
             prev_w, prev_t = tags[idx - 1] if idx > 0 else ("", "")
             idz = -1
             if prev_w.lower() in WITH and w.lower() in WITH_FOLLOWUP:
-                idz = 0
+                idz = -2
             elif prev_w.lower() in THAT and w.lower() in THAT_FOLLOWUP:
-                idz = 0
+                idz = -2
 
             if t in NOUN_TAG:
                 if prev_w in NEUTRAL_WORDS:
@@ -86,11 +86,13 @@ class PronomialCoreferenceSolver:
                         prev_names[gender].append(w)
                     prev_names["neutral"].append(w)
                     prev_names["subject"].append(w)
-                    prev_names["subject_gender"] = gender
+
+                    if next_t.startswith("V"):
+                        prev_names["verb_subject"] = w
+
             elif t in SUBJ_TAG:
                 prev_names["subject"].append(w)
                 gender = predict_gender(w, prev_w, lang=lang)
-                prev_names["subject_gender"] = gender
                 prev_names["neutral"].append(w)
                 if gender == "female":
                     prev_names["female"].append(w)
@@ -110,8 +112,13 @@ class PronomialCoreferenceSolver:
                     elif prev_names["subject"]:
                         candidates.append((idx, w, prev_names["subject"][idz]))
                 elif w in PRONOUNS["neutral"]:
-                    if prev_names["neutral"]:
-                        candidates.append((idx, w, prev_names["neutral"][0]))
+                    # give preference to verb subjects
+                    n = prev_names["neutral"]
+                    if prev_names["verb_subject"]:
+                        n = [_ for _ in prev_names["neutral"]
+                             if _ in prev_names["verb_subject"]] or n
+                    if n:
+                        candidates.append((idx, w, n[idz]))
                     elif prev_names["subject"]:
                         candidates.append((idx, w, prev_names["subject"][idz]))
                 else:
