@@ -233,8 +233,32 @@ class TestCorefEN(unittest.TestCase):
             "The Martians told the Venusians that Martians used to have an ocean"
         )
 
-    def test_known_failures(self):
-        # these errors are understandable and can't really be fixed...
+    def test_capitalization_ambiguity(self):
+        # capitalization mistakes
+        # Cat with upper case is tagged as a male name, works as expected
+        self.assertEqual(
+            replace_corefs("My neighbors have a Cat. It has a bushy tail. They love him!"),
+            "My neighbors have a Cat . Cat has a bushy tail . neighbors love Cat !"
+        )
+
+        # cat with lower case is not gender classified and not selected to
+        # replace "him", tail is wrongly selected because it is the closest
+        # noun
+        self.assertEqual(
+            replace_corefs("My neighbors have a cat. It has a bushy tail. "
+                           "They love him!"),
+            "My neighbors have a cat . cat has a bushy tail . neighbors love tail !"
+            # ... neighbors love cat ...
+        )
+
+    def test_ambiguous(self):
+        # a little ambiguous results, unexpected but technically acceptable
+        self.assertEqual(
+            replace_corefs("the dudes were talking with their enemies and "
+                           "they decided to avoid war"),
+            "the dudes were talking with dudes enemies and enemies decided to avoid war"
+            # ... and dudes decided ...
+        )
         self.assertEqual(
             replace_corefs(
                 "One night, Michael caught Tom breaking into his office to steal drugs, and he used this information to blackmail Lisa into marrying him."),
@@ -242,6 +266,8 @@ class TestCorefEN(unittest.TestCase):
             # ... blackmail Lisa into marrying Michael ."
         )
 
+    def test_gender_failures(self):
+        ## gender misclassifications
         # NOTE Sproule is misclassified as female
         self.assertEqual(
             replace_corefs(
