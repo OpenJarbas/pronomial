@@ -341,7 +341,6 @@ class TestCorefEN(unittest.TestCase):
             [('It', 'London', 0.43478260869565216),
              ('It', 'settlement', 0.2608695652173913),
              ('It', 'millennia', 0.30434782608695654),
-             ('who', 'London', 0.0),
              ('who', 'settlement', 0.07692307692307693),
              ('who', 'millennia', 0.15384615384615385),
              ('who', 'Romans', 0.7692307692307693),
@@ -375,12 +374,9 @@ class TestCorefEN(unittest.TestCase):
                         )
         test_prediction("call dad. tell him to buy bacon. tell him to buy "
                         "coffee. tell him to buy beer",
-                        [('him', 'call', 0.0),
-                         ('him', 'dad', 1.0),
-                         ('him', 'call', 0.0),
+                        [('him', 'dad', 1.0),
                          ('him', 'dad', 0.8461538461538461),
                          ('him', 'bacon', 0.15384615384615385),
-                         ('him', 'call', 0.0),
                          ('him', 'dad', 0.6875),
                          ('him', 'bacon', 0.125),
                          ('him', 'coffee', 0.1875)]

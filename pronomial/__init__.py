@@ -439,7 +439,8 @@ class PronomialCoreferenceSolver:
                 score for tok2_idx, score in candidates[tok_idx].items())
             for tok2_idx, score in candidates[tok_idx].items():
                 candidates[tok_idx][tok2_idx] = score / total
-        return candidates
+        return {k: {k2: v2 for k2, v2 in v.items() if v2 > 0}
+                for k, v in candidates.items()}
 
     @classmethod
     def replace_corefs(cls, text, lang="en"):
