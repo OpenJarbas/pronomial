@@ -33,6 +33,8 @@ raw = score_corefs(sentence, lang="en")
 # tokens[2] == "his" == "Bob"
 
 sentence = "Joe was talking to Bob and told him to go home because he was drunk"
+
+
 tokens = word_tokenize(sentence)
 pred = score_corefs(sentence, lang="en")
 # {7: {0: 0.45454545454545453, 4: 0.5454545454545454},
