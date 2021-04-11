@@ -229,7 +229,6 @@ class PronomialCoreferenceSolver:
                 elif wl in PRONOUNS["plural"]:
                     plural_subjs = [_ for _ in prev_names["subject"] if
                                     is_plural(_, lang)]
-                    names = prev_names["male"] + prev_names["female"]
                     if prev_names["plural"]:
                         if abs(idz) > len(prev_names["plural"]):
                             idz = 0
@@ -242,10 +241,6 @@ class PronomialCoreferenceSolver:
                         if abs(idz) > len(prev_names["subject"]):
                             idz = 0
                         candidates.append((idx, w, prev_names["subject"][idz]))
-                    elif len(names) == 2:
-                        merged_names = NAME_JOINER.join([_ for _ in names if
-                                                         _[0].isupper()])
-                        candidates.append((idx, w, merged_names))
                 else:
                     for k, v in PRONOUNS.items():
                         if prev_names[k] and wl in v:
@@ -303,8 +298,8 @@ class PronomialCoreferenceSolver:
 
                 # score subject tags
                 if wl in PRONOUNS["neutral"] or \
-                        wl in PRONOUNS["male"] or\
-                        wl in PRONOUNS["female"] or\
+                        wl in PRONOUNS["male"] or \
+                        wl in PRONOUNS["female"] or \
                         (wl in PRONOUNS["plural"] and t in ["WP"]):  # "who"
 
                     if prev_names["subject"]:
@@ -390,7 +385,7 @@ class PronomialCoreferenceSolver:
                     plural_subjs = [_ for _ in prev_names["subject"] if
                                     is_plural(_, lang)]
                     names = prev_names["male"] + prev_names["female"]
-                    #names = [_ for _ in names if _[0].isupper()]
+                    # names = [_ for _ in names if _[0].isupper()]
                     if prev_names["plural"]:
                         if abs(idz) > len(prev_names["plural"]):
                             idz = 0
@@ -407,7 +402,7 @@ class PronomialCoreferenceSolver:
                             if tokens[x] in plural_subjs:
                                 candidates[idx][x] += 10  # plural word match
 
-                    #elif len(names) == 2:
+                    # elif len(names) == 2:
                     #    merged_names = NAME_JOINER.join([_ for _ in names if
                     #                                     _[0].isupper()])
                     #    candidates.append((idx, w, merged_names))
@@ -442,11 +437,31 @@ class PronomialCoreferenceSolver:
         return {k: {k2: v2 for k2, v2 in v.items() if v2 > 0}
                 for k, v in candidates.items()}
 
+    @staticmethod
+    def solve_corefs_v2(sentence, lang="en", return_idx=True):
+        tokens = word_tokenize(sentence)
+        candidates = PronomialCoreferenceSolver.score_corefs(sentence, lang)
+        corefs = []
+        for tok_id, match in candidates.items():
+            matches = [(tok_id, mtok_id, score)
+                       for mtok_id, score in match.items()]
+            matches = sorted(matches, key=lambda k: k[2], reverse=True)
+            if len(matches):
+                corefs.append(matches[0])
+        if return_idx:
+            return corefs
+        return [(tokens[tok_id], tokens[mtok_id], score)
+                for tok_id, mtok_id, score in corefs]
+
     @classmethod
-    def replace_corefs(cls, text, lang="en"):
+    def replace_corefs(cls, text, lang="en", legacy=True):
         tokens = word_tokenize(text)
-        for idx, _, w in cls.solve_corefs(text, lang=lang):
-            tokens[idx] = w
+        if legacy:
+            for idx, _, w in cls.solve_corefs(text, lang=lang):
+                tokens[idx] = w
+        else:
+            for tok_id, mtok_id, score in cls.solve_corefs_v2(text, lang=lang):
+                tokens[tok_id] = tokens[mtok_id]
         return " ".join(tokens)
 
     @staticmethod
@@ -454,22 +469,23 @@ class PronomialCoreferenceSolver:
         return " ".join(word_tokenize(text))
 
 
-def normalize(text):
-    return PronomialCoreferenceSolver.normalize(text)
+def normalize(*args, **kwargs):
+    return PronomialCoreferenceSolver.normalize(*args, **kwargs)
 
 
-def detect_nouns(text, lang="en", return_idx=True):
-    return PronomialCoreferenceSolver.detect_nouns(text, lang=lang,
-                                                   return_idx=return_idx)
+def detect_nouns(*args, **kwargs):
+    return PronomialCoreferenceSolver.detect_nouns(*args, **kwargs)
 
 
-def link_pronouns(text, lang="en"):
-    return PronomialCoreferenceSolver.solve_corefs(text, lang=lang)
+def link_pronouns(*args, **kwargs):
+    return PronomialCoreferenceSolver.solve_corefs(*args, **kwargs)
 
 
-def score_corefs(text, lang="en"):
-    return PronomialCoreferenceSolver.score_corefs(text, lang=lang)
+def score_corefs(*args, **kwargs):
+    return PronomialCoreferenceSolver.score_corefs(*args, **kwargs)
 
 
-def replace_corefs(text, lang="en"):
-    return PronomialCoreferenceSolver.replace_corefs(text, lang=lang)
+def replace_corefs(*args, **kwargs):
+    return PronomialCoreferenceSolver.replace_corefs(*args, **kwargs)
+
+

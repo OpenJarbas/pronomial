@@ -78,7 +78,7 @@ class TestCorefEN(unittest.TestCase):
         self.assertEqual(
             replace_corefs("Alice invited Marcia to go with her to "
                            "their favorite store"),
-            "Alice invited Marcia to go with Alice to Alice and Marcia "
+            "Alice invited Marcia to go with Alice to their "
             "favorite store"
         )
 
