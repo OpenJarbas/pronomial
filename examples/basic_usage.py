@@ -17,36 +17,27 @@ solved = "London has been a major settlement for two millennia . London was foun
 result = replace_corefs(sentence, lang="en")
 assert result == solved
 
-# work with tokens instead
-for tok_idx, tok, word in link_pronouns(sentence, lang="en"):
-    assert tokens[tok_idx] == tok
-    tokens[tok_idx] = word
-
-assert tokens == word_tokenize(result)
 
 # work with the raw prediction
-sentence = "Bob loves his dog"
-tokens = word_tokenize(sentence)
-raw = score_corefs(sentence, lang="en")
-# tok_idx, score, word_idx
-# [(2, 10, 0)]
-# tokens[2] == "his" == "Bob"
-
-sentence = "Joe was talking to Bob and told him to go home because he was drunk"
-
-
 tokens = word_tokenize(sentence)
 pred = score_corefs(sentence, lang="en")
-# {7: {0: 0.45454545454545453, 4: 0.5454545454545454},
-# 12: {0: 0.4166666666666667, 4: 0.5, 10: 0.08333333333333333}}
+# {10: {0: 0.56, 5: 0.06, 8: 0.39},
+# 17: {5: 0.02, 8: 0.28, 15: 0.7},
+# 19: {0: 0.56, 5: 0.06, 8: 0.39}}
 
 for tok_idx, match in pred.items():
     tok = tokens[tok_idx]
     for tok2_idx, score in match.items():
         tok2 = tokens[tok2_idx]
         print(tok, tok2, score)
-    # him Joe 0.45454545454545453
-    # him Bob 0.5454545454545454
-    # he Joe 0.4166666666666667
-    # he Bob 0.5
-    # he home 0.08333333333333333
+    # It London 0.56
+    # It settlement 0.06
+    # It millennia 0.39
+    # who settlement 0.02
+    # who millennia 0.28
+    # who Romans 0.7
+    # it London 0.56
+    # it settlement 0.06
+    # it millennia 0.39
+
+
