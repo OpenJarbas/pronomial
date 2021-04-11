@@ -158,7 +158,21 @@ _POSTAGGER = load_pt_tagger()
 def pos_tag_pt(tokens):
     if isinstance(tokens, str):
         tokens = word_tokenize(tokens)
-    return _POSTAGGER.tag(tokens)
+    postagged = _POSTAGGER.tag(tokens)
+
+    # HACK this fixes some know failures from postag
+    # this is not sustainable but important cases can be added at any time
+    # PRs + unittests welcome!
+    DETS = ["a", "á", "o", "ós", "aos", "ao"]
+    for idx, (w, t) in enumerate(postagged):
+        next_w, next_t = postagged[idx + 1] if \
+            idx < len(postagged) - 1 else ("", "")
+
+        #  ('á', 'NOUN'), ('Maria', 'NOUN')
+        if w.lower() in DETS and t == "NOUN":
+            postagged[idx] = (w, "DET")
+
+    return postagged
 
 
 # word rules for gender

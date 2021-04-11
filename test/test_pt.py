@@ -1,5 +1,5 @@
 import unittest
-from pronomial import replace_corefs
+from pronomial import replace_corefs, word_tokenize, score_corefs
 
 
 class TestCorefPT(unittest.TestCase):
@@ -55,4 +55,32 @@ class TestCorefPT(unittest.TestCase):
             replace_corefs("Os americanos foram á lua. Eles são fodidos",
                            lang=self.lang),
             "Os americanos foram á lua . americanos são fodidos"
+        )
+
+    def test_coreferences(self):
+
+        # word indexes are used internally, but to make these tests human
+        # friendly we are comparing actual words, note that in practice we
+        # should work with token indexes
+        def test_prediction(sentence, expected):
+            tokens = word_tokenize(sentence)
+            pred = score_corefs(sentence, lang="pt")
+            matches = []
+            for tok_idx, match in pred.items():
+                tok = tokens[tok_idx]
+                for tok2_idx, score in match.items():
+                    tok2 = tokens[tok2_idx]
+                    matches.append((tok, tok2, score))
+            self.assertEqual(matches, expected)
+
+        test_prediction(
+            "o João disse ao Joaquim que ele está gordo",
+            [('ele', 'João', 0.47),
+             ('ele', 'Joaquim', 0.53)]
+        )
+
+        test_prediction(
+            "a Ana disse á Maria que ela tem bom gosto",
+            [('ela', 'Ana', 0.47),
+             ('ela', 'Maria', 0.53)]
         )

@@ -20,9 +20,6 @@ class PronomialCoreferenceSolver:
 
         NEUTRAL_WORDS = []
 
-        # tokens that indicate the verb_subject should be selected
-        SUBJ_INDICATORS = []
-
         # symbol used when merging Nouns to replace plural pronouns
         NAME_JOINER = "+"
 
@@ -35,8 +32,8 @@ class PronomialCoreferenceSolver:
             from pronomial.lang.en import NOUN_TAG_EN, PLURAL_NOUN_TAG_EN, \
                 PRONOUNS_EN, PRONOUN_TAG_EN, SUBJ_TAG_EN, JJ_TAG_EN, WITH_EN, \
                 GENDERED_WORDS_EN, WITH_FOLLOWUP_EN, THAT_EN, \
-                THAT_FOLLOWUP_EN, NEUTRAL_WORDS_EN, SUBJ_INDICATORS_EN, \
-                NAME_JOINER_EN, IN_EN, IN_FOLLOWUP_EN
+                THAT_FOLLOWUP_EN, NEUTRAL_WORDS_EN, NAME_JOINER_EN, IN_EN, \
+                IN_FOLLOWUP_EN
             GENDERED_WORDS = GENDERED_WORDS_EN
             NOUN_TAG = NOUN_TAG_EN
             SUBJ_TAG = SUBJ_TAG_EN
@@ -49,7 +46,6 @@ class PronomialCoreferenceSolver:
             THAT = THAT_EN
             THAT_FOLLOWUP = THAT_FOLLOWUP_EN
             NEUTRAL_WORDS = NEUTRAL_WORDS_EN
-            SUBJ_INDICATORS = SUBJ_INDICATORS_EN
             NAME_JOINER = NAME_JOINER_EN
             IN = IN_EN
             IN_FOLLOWUP = IN_FOLLOWUP_EN
@@ -68,7 +64,7 @@ class PronomialCoreferenceSolver:
 
         return PRONOUN_TAG, NOUN_TAG, JJ_TAG, PLURAL_NOUN_TAG, SUBJ_TAG, \
                WITH, WITH_FOLLOWUP, THAT, THAT_FOLLOWUP, IN, IN_FOLLOWUP, \
-               NEUTRAL_WORDS, SUBJ_INDICATORS, NAME_JOINER, PRONOUNS, \
+               NEUTRAL_WORDS, NAME_JOINER, PRONOUNS, \
                GENDERED_WORDS
 
     @staticmethod
@@ -76,8 +72,8 @@ class PronomialCoreferenceSolver:
 
         PRONOUN_TAG, NOUN_TAG, JJ_TAG, PLURAL_NOUN_TAG, SUBJ_TAG, \
         WITH, WITH_FOLLOWUP, THAT, THAT_FOLLOWUP, IN, IN_FOLLOWUP, \
-        NEUTRAL_WORDS, SUBJ_INDICATORS, NAME_JOINER, PRONOUNS, \
-        GENDERED_WORDS = PronomialCoreferenceSolver._load_lang_resources(lang)
+        NEUTRAL_WORDS, NAME_JOINER, PRONOUNS, GENDERED_WORDS = \
+            PronomialCoreferenceSolver._load_lang_resources(lang)
 
         tags = pos_tag(sentence, lang=lang)
         prev_names_idx = {
@@ -148,119 +144,10 @@ class PronomialCoreferenceSolver:
         return prev_names_idx
 
     @staticmethod
-    def solve_corefs(sentence, lang="en"):
-        PRONOUN_TAG, NOUN_TAG, JJ_TAG, PLURAL_NOUN_TAG, SUBJ_TAG, \
-        WITH, WITH_FOLLOWUP, THAT, THAT_FOLLOWUP, IN, IN_FOLLOWUP, \
-        NEUTRAL_WORDS, SUBJ_INDICATORS, NAME_JOINER, PRONOUNS, \
-        GENDERED_WORDS = PronomialCoreferenceSolver._load_lang_resources(lang)
-
-        tags = pos_tag(sentence, lang=lang)
-        pron_list = [p for k, p in PRONOUNS.items()]
-        flatten = lambda l: [item for sublist in l for item in sublist]
-        pron_list = flatten(pron_list)
-
-        tagged_nouns = PronomialCoreferenceSolver.detect_nouns(sentence, lang)
-        tokens = tagged_nouns.pop("tokens")
-        candidates = []
-
-        for idx, (w, t) in enumerate(tags):
-            if (t in PRONOUN_TAG and w.lower() in pron_list) or \
-                    any(w in items for k, items in PRONOUNS.items()):
-                prev_w, prev_t = tags[idx - 1] if idx > 0 else ("", "")
-                prev_names = {k: [tokens[i] for i in v if i <= idx]
-                              for k, v in tagged_nouns.items()}
-                # this is a basic mechanism to allow to "look back", the naming
-                # reflects what this does poorly, each language can define word
-                # pairs that will give preference to an earlier noun in the
-                # sentence, loosely named after a couple examples in the
-                # english unittests. TODO generalize this
-                idz = -1
-                if prev_w.lower() in WITH and w.lower() in WITH_FOLLOWUP:
-                    idz = -2
-                elif prev_w.lower() in THAT and w.lower() in THAT_FOLLOWUP:
-                    idz = -2
-                elif prev_w.lower() in IN and w.lower() in IN_FOLLOWUP:
-                    idz = -2
-                wl = w.lower()
-                if wl in PRONOUNS["male"]:
-                    # give preference to verb subjects
-                    n = prev_names["male"]
-                    if (wl in SUBJ_INDICATORS or prev_w in SUBJ_INDICATORS) \
-                            and prev_names["verb_subject"]:
-                        n = [_ for _ in prev_names["male"]
-                             if _ in prev_names["verb_subject"]] or n
-                    if n:
-                        if abs(idz) > len(n):
-                            idz = 0
-                        candidates.append((idx, w, n[idz]))
-                    elif prev_names["subject"]:
-                        if abs(idz) > len(prev_names["subject"]):
-                            idz = 0
-                        candidates.append((idx, w, prev_names["subject"][idz]))
-                elif wl in PRONOUNS["female"]:
-                    # give preference to verb subjects
-                    n = prev_names["female"]
-                    if (wl in SUBJ_INDICATORS or prev_w in SUBJ_INDICATORS) \
-                            and prev_names["verb_subject"]:
-                        n = [_ for _ in prev_names["female"]
-                             if _ in prev_names["verb_subject"]] or n
-                    if n:
-                        if abs(idz) > len(n):
-                            idz = 0
-                        candidates.append((idx, w, n[idz]))
-                    elif prev_names["subject"]:
-                        if abs(idz) > len(prev_names["subject"]):
-                            idz = 0
-                        candidates.append((idx, w, prev_names["subject"][idz]))
-                elif wl in PRONOUNS["neutral"]:
-                    # give preference to verb subjects
-                    n = prev_names["neutral"]
-                    if prev_names["verb_subject"]:
-                        n = [_ for _ in prev_names["neutral"]
-                             if _ in prev_names["verb_subject"]] or n
-                    if n:
-                        if abs(idz) > len(n):
-                            idz = 0
-                        candidates.append((idx, w, n[idz]))
-                    elif prev_names["subject"]:
-                        if abs(idz) > len(prev_names["subject"]):
-                            idz = 0
-                        candidates.append((idx, w, prev_names["subject"][idz]))
-                elif wl in PRONOUNS["plural"]:
-                    plural_subjs = [_ for _ in prev_names["subject"] if
-                                    is_plural(_, lang)]
-                    if prev_names["plural"]:
-                        if abs(idz) > len(prev_names["plural"]):
-                            idz = 0
-                        candidates.append((idx, w, prev_names["plural"][idz]))
-                    elif plural_subjs:
-                        if abs(idz) > len(plural_subjs):
-                            idz = 0
-                        candidates.append((idx, w, plural_subjs[idz]))
-                    elif t in ["WP"] and prev_names["subject"]:
-                        if abs(idz) > len(prev_names["subject"]):
-                            idz = 0
-                        candidates.append((idx, w, prev_names["subject"][idz]))
-                else:
-                    for k, v in PRONOUNS.items():
-                        if prev_names[k] and wl in v:
-                            if abs(idz) > len(prev_names[k]):
-                                idz = 0
-                            candidates.append((idx, w, prev_names[k][idz]))
-                    else:
-                        if prev_names["subject"] and \
-                                wl not in PRONOUNS["first"]:
-                            if abs(idz) > len(prev_names["subject"]):
-                                idz = 0
-                            candidates.append(
-                                (idx, w, prev_names["subject"][idz]))
-        return candidates
-
-    @staticmethod
     def score_corefs(sentence, lang="en"):
         PRONOUN_TAG, NOUN_TAG, JJ_TAG, PLURAL_NOUN_TAG, SUBJ_TAG, \
         WITH, WITH_FOLLOWUP, THAT, THAT_FOLLOWUP, IN, IN_FOLLOWUP, \
-        NEUTRAL_WORDS, SUBJ_INDICATORS, NAME_JOINER, PRONOUNS, \
+        NEUTRAL_WORDS, NAME_JOINER, PRONOUNS, \
         GENDERED_WORDS = PronomialCoreferenceSolver._load_lang_resources(lang)
 
         tags = pos_tag(sentence, lang=lang)
@@ -303,8 +190,8 @@ class PronomialCoreferenceSolver:
                         (wl in PRONOUNS["plural"] and t in ["WP"]):  # "who"
 
                     if prev_names["subject"]:
-                        if abs(idz) > len(prev_names["subject"]):
-                            idz = 0
+                        if idz < 0:
+                            idz = len(prev_names["subject"]) + idz
                         for ids, x in enumerate(prev_ids["subject"]):
                             if x not in candidates[idx]:
                                 candidates[idx][x] = 0
@@ -314,131 +201,92 @@ class PronomialCoreferenceSolver:
 
                 # score gendered pronoun tags
                 if wl in PRONOUNS["male"]:
-                    # give preference to verb subjects
-                    s = []
-                    if (wl in SUBJ_INDICATORS or prev_w in SUBJ_INDICATORS) \
-                            and prev_names["verb_subject"]:
-                        s = [_ for _ in prev_names["male"]
-                             if _ in prev_names["verb_subject"]]
-
                     if prev_names["male"]:
-                        if abs(idz) > len(prev_names["male"]):
-                            idz = 0
+                        if idz < 0:
+                            idz = len(prev_names["male"]) + idz
                         for ids, x in enumerate(prev_ids["male"]):
                             if x not in candidates[idx]:
                                 candidates[idx][x] = 0
-                            candidates[idx][x] += 10  # gender match
+                            candidates[idx][x] += 20  # gender match
                             # freshness bonus
-                            candidates[idx][x] += ids
+                            candidates[idx][x] += ids * 10
                             if ids == idz:
                                 candidates[idx][x] += 10
-                            if tokens[x] in s:
-                                candidates[idx][x] += 10  # verb subject match
+                            if tokens[x] in [_ for _ in prev_names["male"]
+                                             if _ in prev_names["verb_subject"]]:
+                                candidates[idx][x] += 25  # verb subject match
 
                 elif wl in PRONOUNS["female"]:
-                    # give preference to verb subjects
-                    s = []
-                    if (wl in SUBJ_INDICATORS or prev_w in SUBJ_INDICATORS) \
-                            and prev_names["verb_subject"]:
-                        s = [_ for _ in prev_names["female"]
-                             if _ in prev_names["verb_subject"]]
-
                     if prev_names["female"]:
-                        if abs(idz) > len(prev_names["female"]):
-                            idz = 0
+                        if idz < 0:
+                            idz = len(prev_names["female"]) + idz
                         for ids, x in enumerate(prev_ids["female"]):
                             if x not in candidates[idx]:
                                 candidates[idx][x] = 0
 
-                            candidates[idx][x] += 10  # gender match
+                            candidates[idx][x] += 20  # gender match
                             # freshness bonus
-                            candidates[idx][x] += ids
+                            candidates[idx][x] += ids * 10
                             if ids == idz:
                                 candidates[idx][x] += 10
-                            if tokens[x] in s:
-                                candidates[idx][x] += 10  # verb subject match
+                            if tokens[x] in [_ for _ in prev_names["female"]
+                                             if _ in prev_names["verb_subject"]]:
+                                candidates[idx][x] += 25  # verb subject match
 
                 elif wl in PRONOUNS["neutral"]:
-                    # give preference to verb subjects
-                    s = []
-                    if prev_names["verb_subject"]:
-                        s = [_ for _ in prev_names["neutral"]
-                             if _ in prev_names["verb_subject"]]
-
                     if prev_names["neutral"]:
-                        if abs(idz) > len(prev_names["neutral"]):
-                            idz = 0
                         for ids, x in enumerate(prev_ids["neutral"]):
                             if x not in candidates[idx]:
                                 candidates[idx][x] = 0
-
-                            candidates[idx][x] += 10  # gender match
                             # freshness bonus
                             candidates[idx][x] += ids
-                            if ids == idz:
-                                candidates[idx][x] += 10
-                            if tokens[x] in s:
-                                candidates[idx][x] += 10  # verb subject match
+
+                            if tokens[x] in prev_names["verb_subject"]:
+                                candidates[idx][x] += 20  # verb subject match
 
                 # score plural tags
                 elif wl in PRONOUNS["plural"]:
-                    plural_subjs = [_ for _ in prev_names["subject"] if
-                                    is_plural(_, lang)]
-                    names = prev_names["male"] + prev_names["female"]
-                    # names = [_ for _ in names if _[0].isupper()]
                     if prev_names["plural"]:
-                        if abs(idz) > len(prev_names["plural"]):
-                            idz = 0
-
+                        if idz < 0:
+                            idz = len(prev_names["plural"]) + idz
                         for ids, x in enumerate(prev_ids["plural"]):
                             if x not in candidates[idx]:
                                 candidates[idx][x] = 0
-
-                            candidates[idx][x] += 10  # plural pronoun match
+                            candidates[idx][x] += 20  # plural pronoun match
                             # freshness bonus
-                            candidates[idx][x] += ids
+                            candidates[idx][x] += ids * 10
                             if ids == idz:
                                 candidates[idx][x] += 10
-                            if tokens[x] in plural_subjs:
-                                candidates[idx][x] += 10  # plural word match
-
-                    # elif len(names) == 2:
-                    #    merged_names = NAME_JOINER.join([_ for _ in names if
-                    #                                     _[0].isupper()])
-                    #    candidates.append((idx, w, merged_names))
+                            if tokens[x] in [_ for _ in prev_names["subject"] if
+                                             is_plural(_, lang)]:
+                                candidates[idx][x] += 15  # plural word match
+                            if ids in prev_ids["verb_subject"]:
+                                candidates[idx][x] += 10  # verb subject match
 
                 # catch all scorer
-                else:
-                    pass
-                    """
-                    # score all known pronouns
-                    for k, v in PRONOUNS.items():
-                        if prev_names[k] and wl in v:
-                            if abs(idz) > len(prev_names[k]):
-                                idz = 0
-                            candidates.append((idx, w, prev_names[k][idz]))
-                    else:
-                        # nothing matched but we have a pronoun, if it's not
-                        # a first person pronoun let's score all subject tags
-                        if prev_names["subject"] and \
-                                wl not in PRONOUNS["first"]:
-                            if abs(idz) > len(prev_names["subject"]):
-                                idz = 0
-                            candidates.append(
-                                (idx, w, prev_names["subject"][idz]))
-                    """
+                # nothing matched but we have a pronoun, if it's not
+                # a first person pronoun let's score all subject tags
+                elif prev_names["subject"] and wl not in PRONOUNS["first"]:
+                    if idz < 0:
+                        idz = len(prev_names["subject"]) + idz
+                    for ids, x in enumerate(prev_ids["subject"]):
+                        if x not in candidates[idx]:
+                            candidates[idx][x] = 0
+                        if ids == idz:
+                            candidates[idx][x] += 10  # freshness bonus
+                        candidates[idx][x] += ids
 
         # make score of all results add up to 1
         for tok_idx in candidates:
             total = sum(
                 score for tok2_idx, score in candidates[tok_idx].items())
             for tok2_idx, score in candidates[tok_idx].items():
-                candidates[tok_idx][tok2_idx] = score / total
+                candidates[tok_idx][tok2_idx] = round(score / total, 2)
         return {k: {k2: v2 for k2, v2 in v.items() if v2 > 0}
                 for k, v in candidates.items()}
 
     @staticmethod
-    def solve_corefs_v2(sentence, lang="en", return_idx=True):
+    def solve_corefs(sentence, lang="en", return_idx=True):
         tokens = word_tokenize(sentence)
         candidates = PronomialCoreferenceSolver.score_corefs(sentence, lang)
         corefs = []
@@ -454,14 +302,10 @@ class PronomialCoreferenceSolver:
                 for tok_id, mtok_id, score in corefs]
 
     @classmethod
-    def replace_corefs(cls, text, lang="en", legacy=True):
+    def replace_corefs(cls, text, lang="en"):
         tokens = word_tokenize(text)
-        if legacy:
-            for idx, _, w in cls.solve_corefs(text, lang=lang):
-                tokens[idx] = w
-        else:
-            for tok_id, mtok_id, score in cls.solve_corefs_v2(text, lang=lang):
-                tokens[tok_id] = tokens[mtok_id]
+        for tok_id, mtok_id, score in cls.solve_corefs(text, lang=lang):
+            tokens[tok_id] = tokens[mtok_id]
         return " ".join(tokens)
 
     @staticmethod
@@ -487,5 +331,4 @@ def score_corefs(*args, **kwargs):
 
 def replace_corefs(*args, **kwargs):
     return PronomialCoreferenceSolver.replace_corefs(*args, **kwargs)
-
 

@@ -26,7 +26,6 @@ PLURAL_NOUN_TAG_EN = ['NNS', 'NNPS']
 SUBJ_TAG_EN = ["nsubj", "dobj"]
 
 NEUTRAL_WORDS_EN = ["in"]  # if word before Noun -> neutral not male nor female
-SUBJ_INDICATORS_EN = ["his", "and"]  # use verb subject Noun
 
 NAME_JOINER_EN = " and "
 
@@ -50,6 +49,8 @@ def pos_tag_en(tokens):
     ONOFF_VERBS = ["turn"]
     ON_OFF = ["on", "off"]
     IT_VERBS = ["change"]
+    WHILE = ["while"]
+
     for idx, (w, t) in enumerate(postagged):
         next_w, next_t = postagged[idx + 1] if \
                              idx < len(postagged) - 1 else ("", "")
@@ -66,6 +67,7 @@ def pos_tag_en(tokens):
             if t == "NN":
                 postagged[idx] = (w, "VB")
                 postagged[idx + 1] = (next_w, "PRP")
+
     # END HACK
 
     return postagged

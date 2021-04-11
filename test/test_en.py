@@ -40,11 +40,6 @@ class TestCorefEN(unittest.TestCase):
 
     def test_male(self):
         self.assertEqual(
-            replace_corefs("Joe was talking to Bob and told him to go home "
-                           "because he was drunk"),
-            "Joe was talking to Bob and told Bob to go home because Bob was drunk"
-        )
-        self.assertEqual(
             replace_corefs("Jack is one of the top candidates in "
                            "the elections. His ideas are unique compared to "
                            "Bob's."),
@@ -57,6 +52,11 @@ class TestCorefEN(unittest.TestCase):
             "I voted for Elon because Elon is clear about Elon values ."
             " Elon ideas represent a majority of the nation ."
             " Elon is better than Jack ."
+        )
+        self.assertEqual(
+            replace_corefs(
+                "One night, Michael caught Tom breaking into his office to steal drugs, and he used this information to blackmail Lisa into marrying him."),
+            "One night , Michael caught Tom breaking into Michael office to steal drugs , and Michael used this information to blackmail Lisa into marrying Michael ."
         )
 
     def test_plural(self):
@@ -199,19 +199,18 @@ class TestCorefEN(unittest.TestCase):
         # "with her/him/them" will select first male/female/plural noun
         # instead of last seen
         self.assertEqual(
-            replace_corefs("Kevin invited Bob to go with him to "
-                           "his favorite fishing spot"),
-            "Kevin invited Bob to go with Kevin to Kevin favorite fishing spot"
-        )
-        self.assertEqual(
             replace_corefs("Alice invited Marcia to go with her"),
             "Alice invited Marcia to go with Alice"
         )
-
         self.assertEqual(
             replace_corefs("The Martians invited the Venusians to go with "
                            "them to Pluto"),
             "The Martians invited the Venusians to go with Martians to Pluto"
+        )
+        self.assertEqual(
+            replace_corefs("Kevin invited Bob to go with him to "
+                           "his favorite fishing spot"),
+            "Kevin invited Bob to go with Kevin to Bob favorite fishing spot"
         )
 
     def test_that(self):
@@ -255,16 +254,17 @@ class TestCorefEN(unittest.TestCase):
     def test_ambiguous(self):
         # a little ambiguous results, unexpected but technically acceptable
         self.assertEqual(
+            replace_corefs("Joe was talking to Bob and told him to go home "
+                           "because he was drunk"),
+            "Joe was talking to Bob and told Bob to go home because Joe was drunk"
+            # ... because Bob was drunk ...
+        )
+
+        self.assertEqual(
             replace_corefs("the dudes were talking with their enemies and "
                            "they decided to avoid war"),
             "the dudes were talking with dudes enemies and enemies decided to avoid war"
             # ... and dudes decided ...
-        )
-        self.assertEqual(
-            replace_corefs(
-                "One night, Michael caught Tom breaking into his office to steal drugs, and he used this information to blackmail Lisa into marrying him."),
-            "One night , Michael caught Tom breaking into Michael office to steal drugs , and Michael used this information to blackmail Lisa into marrying Tom ."
-            # ... blackmail Lisa into marrying Michael ."
         )
 
     def test_gender_failures(self):
@@ -278,10 +278,9 @@ class TestCorefEN(unittest.TestCase):
                 "City manager Gary Johnson dedicated their equalising goal "
                 "in the match to Janet, who had sent a message of support to her teammates."),
             "Janet has a husband , Sproule , and one son , Sam . "
-            "A second child was stillborn in November 2009 , causing Sproule to miss Bristol City 's match against Nottingham Forest . "
+            "A second child was stillborn in November 2009 , causing Janet to miss Bristol City 's match against Nottingham Forest . "
             "City manager Gary Johnson dedicated their equalising goal in the match to Janet , "
             "Janet had sent a message of support to Janet teammates .")
-        #  "... causing Janet to miss ..."
 
         # "his" and "him" are not properly replaced because Sproule is misclassified as female
         self.assertEqual(
@@ -337,52 +336,123 @@ class TestCorefEN(unittest.TestCase):
 
         test_prediction(
             "London has been a major settlement for two millennia. It was founded by the Romans, who named it Londinium.",
-            [('It', 'London', 0.43478260869565216),
-             ('It', 'settlement', 0.2608695652173913),
-             ('It', 'millennia', 0.30434782608695654),
-             ('who', 'settlement', 0.07692307692307693),
-             ('who', 'millennia', 0.15384615384615385),
-             ('who', 'Romans', 0.7692307692307693),
-             ('it', 'London', 0.43478260869565216),
-             ('it', 'settlement', 0.2608695652173913),
-             ('it', 'millennia', 0.30434782608695654)]
-            )
-        test_prediction(
-            "Joe was talking to Bob and told him to go home because he was drunk",
-            [('him', 'Joe', 0.45454545454545453),
-             ('him', 'Bob', 0.5454545454545454),
-             ('he', 'Joe', 0.4166666666666667),
-             ('he', 'Bob', 0.5),
-             ('he', 'home', 0.08333333333333333)]
+            [('It', 'London', 0.56),
+             ('It', 'settlement', 0.06),
+             ('It', 'millennia', 0.39),
+             ('who', 'settlement', 0.02),
+             ('who', 'millennia', 0.28),
+             ('who', 'Romans', 0.7),
+             ('it', 'London', 0.56),
+             ('it', 'settlement', 0.06),
+             ('it', 'millennia', 0.39)]
             )
         test_prediction("My neighbors have a Cat. It has a bushy tail. They "
                         "love him!",
                         [('It', 'Cat', 1.0),
                          ('They', 'neighbors', 1.0),
-                         ('him', 'Cat', 0.9090909090909091),
-                         ('him', 'tail', 0.09090909090909091)]
+                         ('him', 'Cat', 0.65),
+                         ('him', 'tail', 0.35)]
                         )
         test_prediction("dog is man's best friend. It is always loyal.",
-                        [('It', 'dog', 0.43478260869565216),
-                         ('It', 'man', 0.2608695652173913),
-                         ('It', 'friend', 0.30434782608695654)]
+                        [('It', 'dog', 0.56),
+                         ('It', 'man', 0.06),
+                         ('It', 'friend', 0.39)]
                         )
         test_prediction("The sign was too far away for the boy to read it.",
-                        [('it', 'sign', 0.625),
-                         ('it', 'boy', 0.375)]
+                        [('it', 'sign', 0.62),
+                         ('it', 'boy', 0.38)]
                         )
         test_prediction("call dad. tell him to buy bacon. tell him to buy "
                         "coffee. tell him to buy beer",
                         [('him', 'dad', 1.0),
-                         ('him', 'dad', 0.8461538461538461),
-                         ('him', 'bacon', 0.15384615384615385),
-                         ('him', 'dad', 0.6875),
-                         ('him', 'bacon', 0.125),
-                         ('him', 'coffee', 0.1875)]
+                         ('him', 'dad', 0.64),
+                         ('him', 'bacon', 0.36),
+                         ('him', 'dad', 0.58),
+                         ('him', 'bacon', 0.06),
+                         ('him', 'coffee', 0.36)]
                         )
         test_prediction(
             "the dudes were talking with their enemies and they decided to avoid war",
             [('their', 'dudes', 1.0),
-             ('they', 'dudes', 0.47619047619047616),
-             ('they', 'enemies', 0.5238095238095238)]
+             ('they', 'dudes', 0.33),
+             ('they', 'enemies', 0.67)]
             )
+
+        test_prediction(
+            "Alice invited Marcia to go with her to their favorite store",
+            [('her', 'Alice', 0.68),
+             ('her', 'Marcia', 0.32)]
+        )
+
+        test_prediction(
+            "Joe was talking to Bob and told him to go home because he was drunk",
+            [('him', 'Joe', 0.47),
+             ('him', 'Bob', 0.53),
+             ('he', 'Joe', 0.51),
+             ('he', 'Bob', 0.35),
+             ('he', 'home', 0.14)]
+        )
+
+        test_prediction(
+            "One night, Michael caught Tom breaking into his office to steal drugs, and he used this information to blackmail Lisa into marrying him.",
+            [('his', 'Michael', 0.57),
+             ('his', 'Tom', 0.43),
+             ('he', 'Michael', 0.51),
+             ('he', 'Tom', 0.35),
+             ('he', 'office', 0.14),
+             ('him', 'Michael', 0.46),
+             ('him', 'Tom', 0.32),
+             ('him', 'office', 0.03),
+             ('him', 'information', 0.04),
+             ('him', 'Lisa', 0.15)]
+        )
+        test_prediction(
+            "A short while later, Michael decided that he wanted to play a role in his son's life, and tried to get Lisa to marry him, but by this time, she wanted nothing to do with him. "
+            "Around the same time, Lisa's son Tom had returned from Vietnam with a drug habit. One night, Michael caught Tom breaking into his office to steal drugs",
+            [('he', 'while', 0.19),
+             ('he', 'Michael', 0.81),
+             ('his', 'while', 0.02),
+             ('his', 'Michael', 0.93),
+             ('his', 'role', 0.05),
+             ('him', 'while', 0.01),
+             ('him', 'Michael', 0.62),
+             ('him', 'role', 0.04),
+             ('him', 'son', 0.05),
+             ('him', 'life', 0.07),
+             ('him', 'Lisa', 0.21),
+             ('she', 'while', 0.02),
+             ('she', 'Michael', 0.03),
+             ('she', 'role', 0.05),
+             ('she', 'son', 0.07),
+             ('she', 'life', 0.09),
+             ('she', 'Lisa', 0.45),
+             ('she', 'time', 0.29),
+             ('him', 'while', 0.01),
+             ('him', 'Michael', 0.52),
+             ('him', 'role', 0.03),
+             ('him', 'son', 0.04),
+             ('him', 'life', 0.05),
+             ('him', 'Lisa', 0.07),
+             ('him', 'time', 0.19),
+             ('him', 'nothing', 0.09),
+             ('his', 'Michael', 0.1),
+             ('his', 'role', 0.01),
+             ('his', 'son', 0.01),
+             ('his', 'life', 0.01),
+             ('his', 'Lisa', 0.01),
+             ('his', 'time', 0.01),
+             ('his', 'nothing', 0.02),
+             ('his', 'time', 0.02),
+             ('his', 'Lisa', 0.02),
+             ('his', 'son', 0.02),
+             ('his', 'Tom', 0.14),
+             ('his', 'Vietnam', 0.11),
+             ('his', 'drug', 0.03),
+             ('his', 'habit', 0.03),
+             ('his', 'night', 0.03),
+             ('his', 'Michael', 0.21),
+             ('his', 'Tom', 0.21)]
+        )
+
+
+
