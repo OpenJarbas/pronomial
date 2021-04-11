@@ -13,6 +13,14 @@ class TestCorefEN(unittest.TestCase):
             replace_corefs("Inês said she loves me!"),
             "Inês said Inês loves me !"
         )
+        # note the failure to replace "their", plurals are only replaced if
+        # plural nouns are detected, multi word references are not caught
+        self.assertEqual(
+            replace_corefs("Alice invited Marcia to go with her to "
+                           "their favorite store"),
+            "Alice invited Marcia to go with Alice to their "
+            "favorite store"
+        )
         self.assertEqual(
             replace_corefs("Bob threatened to kill Alice to make her pay "
                            "her debts"),
@@ -72,14 +80,6 @@ class TestCorefEN(unittest.TestCase):
             replace_corefs(
                 "My neighbours just adopted a puppy. They care for it like a baby."),
             "My neighbours just adopted a puppy . neighbours care for puppy like a baby ."
-        )
-
-        # merging of previous Nouns (limited to 2 names total)
-        self.assertEqual(
-            replace_corefs("Alice invited Marcia to go with her to "
-                           "their favorite store"),
-            "Alice invited Marcia to go with Alice to their "
-            "favorite store"
         )
 
     def test_it(self):
@@ -174,7 +174,6 @@ class TestCorefEN(unittest.TestCase):
 
     def test_neutral_postag(self):
         # in {noun}-> in == IN -> {noun} == neutral
-
         # "Arendelle" is recognized as a location because of "in", otherwise
         # it would be tagged as a female name and be used instead of Elsa
         self.assertEqual(
