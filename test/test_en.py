@@ -191,7 +191,8 @@ class TestCorefEN(unittest.TestCase):
             "One night , Michael caught Tom in Michael office"
         )
         self.assertEqual(
-            replace_corefs("One night, Michael caught Tom breaking into his office"),
+            replace_corefs(
+                "One night, Michael caught Tom breaking into his office"),
             "One night , Michael caught Tom breaking into Michael office"
         )
 
@@ -237,7 +238,8 @@ class TestCorefEN(unittest.TestCase):
         # capitalization mistakes
         # Cat with upper case is tagged as a male name, works as expected
         self.assertEqual(
-            replace_corefs("My neighbors have a Cat. It has a bushy tail. They love him!"),
+            replace_corefs(
+                "My neighbors have a Cat. It has a bushy tail. They love him!"),
             "My neighbors have a Cat . Cat has a bushy tail . neighbors love Cat !"
         )
 
@@ -291,10 +293,12 @@ class TestCorefEN(unittest.TestCase):
             "Sproule has a wife , Janet , and one son , Sam . "
             "A second child was stillborn in November 2009 , causing Sam to miss Bristol City 's match against Nottingham Forest . "
             "City manager Gary Johnson dedicated their equalising goal in the match to Sproule , Sproule had sent a message of support to Johnson teammates .")
-            #  "... causing Sproule to miss ... to Sproule teammates"
+        #  "... causing Sproule to miss ... to Sproule teammates"
 
-    def test_detect_nouns_en(self):
-        tokens = ['London', 'has', 'been', 'a', 'major', 'settlement', 'for', 'two', 'millennia', '.', 'It', 'was', 'founded', 'by', 'the', 'Romans', ',', 'who', 'named', 'it', 'Londinium', '.']
+    def test_detect_nouns(self):
+        tokens = ['London', 'has', 'been', 'a', 'major', 'settlement', 'for',
+                  'two', 'millennia', '.', 'It', 'was', 'founded', 'by', 'the',
+                  'Romans', ',', 'who', 'named', 'it', 'Londinium', '.']
         self.assertEqual(
             detect_nouns(tokens, lang="en"),
             {'female': [],
@@ -315,3 +319,75 @@ class TestCorefEN(unittest.TestCase):
              'subject': ['London', 'settlement', 'millennia', 'Londinium'],
              'verb_subject': ['London'],
              "tokens": tokens})
+
+    def test_coreferences(self):
+
+        # word indexes are used internally, but to make these tests human
+        # friendly we are comparing actual words, note that in practice we
+        # should work with token indexes
+        def test_prediction(sentence, expected):
+            tokens = word_tokenize(sentence)
+            pred = score_corefs(sentence, lang="en")
+            matches = []
+            for tok_idx, match in pred.items():
+                tok = tokens[tok_idx]
+                for tok2_idx, score in match.items():
+                    tok2 = tokens[tok2_idx]
+                    matches.append((tok, tok2, score))
+            self.assertEqual(matches, expected)
+
+        test_prediction(
+            "London has been a major settlement for two millennia. It was founded by the Romans, who named it Londinium.",
+            [('It', 'London', 0.43478260869565216),
+             ('It', 'settlement', 0.2608695652173913),
+             ('It', 'millennia', 0.30434782608695654),
+             ('who', 'London', 0.0),
+             ('who', 'settlement', 0.07692307692307693),
+             ('who', 'millennia', 0.15384615384615385),
+             ('who', 'Romans', 0.7692307692307693),
+             ('it', 'London', 0.43478260869565216),
+             ('it', 'settlement', 0.2608695652173913),
+             ('it', 'millennia', 0.30434782608695654)]
+            )
+        test_prediction(
+            "Joe was talking to Bob and told him to go home because he was drunk",
+            [('him', 'Joe', 0.45454545454545453),
+             ('him', 'Bob', 0.5454545454545454),
+             ('he', 'Joe', 0.4166666666666667),
+             ('he', 'Bob', 0.5),
+             ('he', 'home', 0.08333333333333333)]
+            )
+        test_prediction("My neighbors have a Cat. It has a bushy tail. They "
+                        "love him!",
+                        [('It', 'Cat', 1.0),
+                         ('They', 'neighbors', 1.0),
+                         ('him', 'Cat', 0.9090909090909091),
+                         ('him', 'tail', 0.09090909090909091)]
+                        )
+        test_prediction("dog is man's best friend. It is always loyal.",
+                        [('It', 'dog', 0.43478260869565216),
+                         ('It', 'man', 0.2608695652173913),
+                         ('It', 'friend', 0.30434782608695654)]
+                        )
+        test_prediction("The sign was too far away for the boy to read it.",
+                        [('it', 'sign', 0.625),
+                         ('it', 'boy', 0.375)]
+                        )
+        test_prediction("call dad. tell him to buy bacon. tell him to buy "
+                        "coffee. tell him to buy beer",
+                        [('him', 'call', 0.0),
+                         ('him', 'dad', 1.0),
+                         ('him', 'call', 0.0),
+                         ('him', 'dad', 0.8461538461538461),
+                         ('him', 'bacon', 0.15384615384615385),
+                         ('him', 'call', 0.0),
+                         ('him', 'dad', 0.6875),
+                         ('him', 'bacon', 0.125),
+                         ('him', 'coffee', 0.1875)]
+                        )
+        test_prediction(
+            "the dudes were talking with their enemies and they decided to avoid war",
+            [('their', 'dudes', 1.0),
+             ('they', 'dudes', 0.47619047619047616),
+             ('they', 'enemies', 0.5238095238095238)]
+            )
