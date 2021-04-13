@@ -1,5 +1,5 @@
-from nltk import pos_tag as _ptag
-from nltk.tokenize import word_tokenize
+import nltk
+from pronomial.utils import word_tokenize
 
 PRONOUNS_EN = {
     'male': ['he', 'him', 'himself', 'his'],
@@ -41,7 +41,11 @@ def pos_tag_en(tokens):
     if isinstance(tokens, str):
         tokens = word_tokenize(tokens)
 
-    postagged = _ptag(tokens)
+    try:
+        postagged = nltk.pos_tag(tokens)
+    except LookupError:
+        nltk.download("averaged_perceptron_tagger")
+        return pos_tag_en(tokens)
 
     # HACK this fixes some know failures from postag
     # this is not sustainable but important cases can be added at any time

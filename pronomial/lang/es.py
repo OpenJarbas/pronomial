@@ -1,6 +1,6 @@
 import pickle
 from os.path import isfile, join, dirname
-from nltk.tokenize import word_tokenize
+from pronomial.utils import word_tokenize
 import nltk.tag
 import nltk
 from string import punctuation
