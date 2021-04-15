@@ -1,6 +1,5 @@
 import pickle
 from os.path import isfile, join, dirname
-from pronomial.utils import word_tokenize
 import nltk.tag
 import nltk
 from string import punctuation
@@ -157,6 +156,7 @@ _POSTAGGER = load_pt_tagger()
 
 def pos_tag_pt(tokens):
     if isinstance(tokens, str):
+        from pronomial.utils import word_tokenize
         tokens = word_tokenize(tokens)
     postagged = _POSTAGGER.tag(tokens)
 
