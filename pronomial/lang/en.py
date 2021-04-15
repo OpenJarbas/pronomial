@@ -1,5 +1,5 @@
 import nltk
-
+from quebra_frases import word_tokenize
 
 PRONOUNS_EN = {
     'male': ['he', 'him', 'himself', 'his'],
@@ -39,7 +39,6 @@ GENDERED_WORDS_EN = {
 
 def pos_tag_en(tokens):
     if isinstance(tokens, str):
-        from pronomial.utils import word_tokenize
         tokens = word_tokenize(tokens)
 
     try:

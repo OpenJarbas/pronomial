@@ -3,20 +3,11 @@ import csv
 import nltk
 import pickle
 
+from quebra_frases import word_tokenize
 from pronomial.lang.pt import pos_tag_pt
 from pronomial.lang.en import pos_tag_en, is_plural_en
 from pronomial.lang.es import pos_tag_es
 from pronomial.lang.ca import pos_tag_ca
-
-from nltk.tokenize import word_tokenize as _wt
-
-
-def word_tokenize(text, lang="en"):
-    try:
-        return _wt(text)
-    except LookupError:
-        nltk.download("punkt")
-        return _wt(text)
 
 
 def pos_tag(text, lang="en"):

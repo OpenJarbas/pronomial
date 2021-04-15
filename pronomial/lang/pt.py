@@ -4,7 +4,7 @@ import nltk.tag
 import nltk
 from string import punctuation
 from random import shuffle
-
+from quebra_frases import word_tokenize
 
 PRONOUNS_PT = {
     'male': ['ele', "lo", "dele", "nele", "seu", "eles", "seus", "deles",
@@ -156,7 +156,6 @@ _POSTAGGER = load_pt_tagger()
 
 def pos_tag_pt(tokens):
     if isinstance(tokens, str):
-        from pronomial.utils import word_tokenize
         tokens = word_tokenize(tokens)
     postagged = _POSTAGGER.tag(tokens)
 

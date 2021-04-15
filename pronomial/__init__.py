@@ -279,7 +279,8 @@ class PronomialCoreferenceSolver:
         # make score of all results add up to 1
         for tok_idx in candidates:
             total = sum(
-                score for tok2_idx, score in candidates[tok_idx].items())
+                score for tok2_idx, score in candidates[tok_idx].items()) + \
+                    0.001  # ensure no division by 0
             for tok2_idx, score in candidates[tok_idx].items():
                 candidates[tok_idx][tok2_idx] = round(score / total, 2)
         return {k: {k2: v2 for k2, v2 in v.items() if v2 > 0}

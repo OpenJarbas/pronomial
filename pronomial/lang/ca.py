@@ -1,6 +1,6 @@
 import pickle
 from os.path import isfile, join, dirname
-
+from quebra_frases import word_tokenize
 import nltk.tag
 import nltk
 from string import punctuation
@@ -399,7 +399,6 @@ _POSTAGGER = load_ca_tagger()
 
 def pos_tag_ca(tokens):
     if isinstance(tokens, str):
-        from pronomial.utils import word_tokenize
         tokens = word_tokenize(tokens)
     return _POSTAGGER.tag(tokens)
 
