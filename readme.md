@@ -28,15 +28,11 @@ replace_corefs("London has been a major settlement for two millennia. "
 ## About
 
 Pronomial will work fine for short sentences and should be safe to use in 
-the context of simple things like intent parsing, but it tends to fail 
-horribly in long sentences.
+the context of simple things, but it tends to fail horribly in complex sentences.
 
 It you want a proper coreference resolution library I suggest you check out
-[neuralcoref](https://github.com/huggingface/neuralcoref)
+[neuralcoref](https://github.com/huggingface/neuralcoref) or [https://github.com/msg-systems/coreferee](coreferee)
 
 Pronomial should not be used in production most of the
 time, it is intended as baseline and an experiment on how well this
-task can be solved using only heuristics. 
-
-
-Keep an eye on this section for future benchmarks
+task can be solved using only simple heuristics. 
