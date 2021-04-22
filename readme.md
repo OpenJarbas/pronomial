@@ -31,7 +31,7 @@ Pronomial will work fine for short sentences and should be safe to use in
 the context of simple things, but it tends to fail horribly in complex sentences.
 
 It you want a proper coreference resolution library I suggest you check out
-[neuralcoref](https://github.com/huggingface/neuralcoref) or [https://github.com/msg-systems/coreferee](coreferee)
+[neuralcoref](https://github.com/huggingface/neuralcoref) or [coreferee](https://github.com/msg-systems/coreferee)
 
 Pronomial should not be used in production most of the
 time, it is intended as baseline and an experiment on how well this
