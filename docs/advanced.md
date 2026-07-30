@@ -5,8 +5,8 @@
 Resolution runs in three layers, each exposed as a public call:
 
 1. **`detect_nouns`** POS-tags the sentence and files every noun into role
-   buckets — `male`, `female`, `first`, `neutral`, `plural`, `subject`,
-   `verb_subject`. Gender comes from `predict_gender`; plurality and subject
+   buckets: `male`, `female`, `first`, `neutral`, `plural`, `subject`,
+   `verb_subject`. Gender comes from `predict_gender`. Plurality and subject
    position come from the tags and word order.
 2. **`score_corefs`** walks the sentence, and for each pronoun considers only
    the nouns *before* it. It awards points per matching bucket, then normalizes
@@ -17,11 +17,11 @@ Resolution runs in three layers, each exposed as a public call:
 
 The bonuses that shape the ranking:
 
-- **Gender match** — a gendered pronoun lands on a same-gender noun.
-- **Freshness** — closer (more recent) antecedents outscore far ones.
-- **Verb-subject** — a noun immediately followed by a verb is favoured, since
+- **Gender match**: a gendered pronoun lands on a same-gender noun.
+- **Freshness**: closer (more recent) antecedents outscore far ones.
+- **Verb-subject**: a noun immediately followed by a verb is favored, since
   it is likely the clause subject.
-- **Plural** — plural pronouns prefer plural nouns and merged noun groups.
+- **Plural**: plural pronouns prefer plural nouns and merged noun groups.
 
 You rarely need to touch the scores, but reading `score_corefs` output is the
 fastest way to understand why a given antecedent won.
@@ -56,7 +56,7 @@ which is handy when diffing input against output.
 
 ## Multi-language notes
 
-Pass any BCP-47 code; only the segment before `-` is read, so `"pt"` and
+Pass any BCP-47 code. Only the segment before `-` is read, so `"pt"` and
 `"pt-PT"` behave identically.
 
 ```python
@@ -72,8 +72,8 @@ replace_corefs("Juan compró un coche. Él lo conduce.", lang="es")
   morphological gender prediction (the noun's article and ending), and a
   trailing-`s` plural test.
 
-The pronoun buckets are the same five everywhere — `male`, `female`, `first`,
-`neutral`, `plural` — defined in `pronomial/lang/<code>.py`.
+The pronoun buckets are the same five everywhere: `male`, `female`, `first`,
+`neutral`, `plural`, defined in `pronomial/lang/<code>.py`.
 
 ## Gotchas
 
@@ -81,7 +81,7 @@ The pronoun buckets are the same five everywhere — `male`, `female`, `first`,
   punctuation (`"... millennia ."`). If you need the original spacing, align the
   tokens yourself against `word_tokenize(text)`.
 - **A pronoun may resolve to itself.** When no better antecedent scores high
-  enough, the top candidate can be the pronoun's own token; the rewrite is then
+  enough, the top candidate can be the pronoun's own token. The rewrite is then
   a no-op for that slot.
 - **Heuristic, not exact.** This is a deliberately small rule-based baseline. It
   shines on short, single-referent sentences and degrades on long sentences with
@@ -111,8 +111,5 @@ def replace_above(text, lang="en", threshold=0.5):
 replace_above("London is old. It was founded by Romans.", threshold=0.5)
 ```
 
-## Where next
-
-- [quickstart.md](quickstart.md) — install and first calls
-- [api.md](api.md) — full public surface with signatures and return shapes
-- [opm.md](opm.md) — the OVOS `opm.agents.coref` plugin
+---
+[← API](api.md) · [Home](../readme.md) · [OPM plugin →](opm.md)

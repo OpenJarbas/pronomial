@@ -19,11 +19,11 @@ from pronomial import (
 
 The module-level functions (`replace_corefs`, `link_pronouns`, `score_corefs`,
 `detect_nouns`, `normalize`) are thin wrappers over the matching
-`PronomialCoreferenceSolver` methods — use whichever style you prefer; they take
+`PronomialCoreferenceSolver` methods. Use whichever style you prefer. They take
 the same arguments and return the same shapes.
 
 Every call accepts a `lang` argument as a BCP-47 code (`"en"`, `"pt"`, `"es"`,
-`"ca"`, or regional variants like `"pt-PT"`); only the part before `-` is read.
+`"ca"`, or regional variants like `"pt-PT"`). Only the part before `-` is read.
 
 ## Coreference functions
 
@@ -65,9 +65,9 @@ Indices line up with `word_tokenize(text)`. This is the same as
 
 ### `score_corefs(text, lang="en") -> dict`
 
-The full scored candidate table — the raw material `link_pronouns` picks from.
+The full scored candidate table, the raw material `link_pronouns` picks from.
 Maps each pronoun's token index to a `{antecedent_idx: score}` dict. Scores for a
-given pronoun are normalized to sum to roughly `1.0`; zero-score candidates are
+given pronoun are normalized to sum to roughly `1.0`. Zero-score candidates are
 dropped.
 
 ```python
@@ -114,12 +114,12 @@ nouns["plural"]        # ['Romans']
 nouns["verb_subject"]  # ['London']
 ```
 
-A noun can appear in several buckets at once; the scorer uses these
+A noun can appear in several buckets at once. The scorer uses these
 memberships to award gender, plurality, and subject bonuses.
 
 ### `normalize(text) -> str`
 
-Tokenize and re-join with single spaces — the same normalization the solver
+Tokenize and re-join with single spaces, the same normalization the solver
 applies internally. Useful for comparing your input against resolved output.
 
 ```python
@@ -170,7 +170,7 @@ word_tokenize("It was founded by the Romans.")
 ### `pos_tag(text, lang="en") -> list[tuple[str, str]]`
 
 POS-tag a string into `(token, tag)` pairs. English uses the NLTK
-averaged-perceptron tagger (Penn Treebank tags); `pt`/`es` load a bundled
+averaged-perceptron tagger (Penn Treebank tags). `pt`/`es` load a bundled
 pickle. The per-language tag sets the solver checks against (`NOUN`, `PRON`,
 `ADJ`, ...) are defined in `pronomial/lang/*.py`.
 
@@ -196,7 +196,7 @@ predict_gender("John")    # 'male'
 
 ### `is_plural(text, lang="en") -> bool`
 
-Whether a token is plural. English uses morphological rules; other languages use
+Whether a token is plural. English uses morphological rules. Other languages use
 a trailing-`s` check.
 
 ```python
@@ -206,8 +206,5 @@ is_plural("Romans", lang="en")   # True
 is_plural("Rome", lang="en")     # False
 ```
 
-## Where next
-
-- [quickstart.md](quickstart.md) — install and first calls
-- [advanced.md](advanced.md) — how scoring works, multi-language notes, gotchas
-- [opm.md](opm.md) — the OVOS `opm.agents.coref` plugin
+---
+[← Quickstart](quickstart.md) · [Home](../readme.md) · [Advanced →](advanced.md)
