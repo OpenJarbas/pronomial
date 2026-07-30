@@ -63,8 +63,5 @@ rewriting (`solve_corefs`) follows the core library, so it covers `en`, `pt`,
 and `es`; `ca` falls back to returning the input unchanged because Catalan POS
 tagging is not wired up.
 
-## Where next
-
-- [quickstart.md](quickstart.md) — install and first calls
-- [api.md](api.md) — the underlying library surface
-- [advanced.md](advanced.md) — scoring internals, multi-language notes, gotchas
+---
+[← Advanced](advanced.md) · [Home](../readme.md)

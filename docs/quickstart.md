@@ -1,10 +1,10 @@
 # Quickstart
 
-`pronomial` is a fast, heuristic coreference solver: it points each pronoun at
+`pronomial` is a fast, heuristic coreference solver. It points each pronoun at
 the noun it most likely refers to, then can rewrite the sentence with the
 pronoun replaced by that noun. It works on POS tags plus curated pronoun and
-gendered-word lists — no neural model, no network, no GPU. English, Portuguese,
-Spanish, and Catalan are supported.
+gendered-word lists, with no neural model, no network, and no GPU. English,
+Portuguese, Spanish, and Catalan are supported.
 
 ## 1. Install
 
@@ -43,7 +43,7 @@ tokens.
 
 When you want the antecedent decisions rather than a rewritten string, use
 `link_pronouns`. By default it returns token-*index* triples
-`(pronoun_idx, antecedent_idx, score)`; pass `return_idx=False` for the words.
+`(pronoun_idx, antecedent_idx, score)`. Pass `return_idx=False` for the words.
 
 ```python
 from pronomial import link_pronouns
@@ -60,7 +60,7 @@ the values for one pronoun sum to roughly `1.0`.
 
 ## 4. Another language
 
-Pass any BCP-47 code; only the language part (before `-`) is used.
+Pass any BCP-47 code. Only the language part (before `-`) is used.
 
 ```python
 from pronomial import replace_corefs, link_pronouns
@@ -73,8 +73,5 @@ print(link_pronouns(pt, lang="pt", return_idx=False))
 # [('Ela', 'Maria', 0.8), ('dele', 'dele', 0.67)]
 ```
 
-## Where next
-
-- [api.md](api.md) — every public function and class, real signatures, return shapes
-- [advanced.md](advanced.md) — scoring internals, multi-language notes, gotchas, recipes
-- [opm.md](opm.md) — using `pronomial` as an OVOS `opm.agents.coref` plugin
+---
+[Home](../readme.md) · [API →](api.md)

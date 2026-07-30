@@ -1,17 +1,17 @@
 # Pronomial
 
-simple and fast coreference solver, uses pos tags, a word gender classifier 
-and lists of pronouns
+Pronomial is a fast, rule-based coreference solver. It links each pronoun in a
+text to the noun it most likely refers to, using part-of-speech tags, a word
+gender classifier, and lists of pronouns. It supports English, Portuguese,
+Spanish, and Catalan.
 
-Supported languages: English, Portuguese, Spanish, Catalan
-
-# Install
+## Install
 
 ```bash
 pip install pronomial
 ```
 
-# Usage
+## Usage
 
 ```python
 from pronomial import replace_corefs
@@ -25,14 +25,25 @@ replace_corefs("London has been a major settlement for two millennia. "
 """
 ```
 
+See [docs/quickstart.md](docs/quickstart.md) for more examples, and
+[docs/api.md](docs/api.md) for the full function and class reference.
+
 ## About
 
-Pronomial will work fine for short sentences and should be safe to use in 
-the context of simple things, but it tends to fail horribly in complex sentences.
+Pronomial works well on short sentences. It is safe to use for simple text,
+but it can fail on complex sentences with several competing antecedents.
 
-It you want a proper coreference resolution library I suggest you check out
-[neuralcoref](https://github.com/huggingface/neuralcoref) or [coreferee](https://github.com/msg-systems/coreferee)
+For a full coreference resolution library, see
+[neuralcoref](https://github.com/huggingface/neuralcoref) or
+[coreferee](https://github.com/msg-systems/coreferee).
 
-Pronomial should not be used in production most of the
-time, it is intended as baseline and an experiment on how well this
-task can be solved using only simple heuristics. 
+Pronomial is a baseline. It shows how well simple heuristics can solve
+coreference resolution. Do not rely on it for production use.
+
+## Related projects
+
+- [TigreGotico/quebra_frases](https://github.com/TigreGotico/quebra_frases): the tokenizer Pronomial uses to split text into words.
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE).
