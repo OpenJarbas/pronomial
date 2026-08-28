@@ -2,6 +2,7 @@ from setuptools import setup
 
 
 PLUGIN_ENTRY_POINT = 'ovos-coref-plugin-pronomial=pronomial.opm:PronomialCoreferenceSolver'
+AGENT_ENTRY_POINT = 'pronomial=pronomial.opm:PronomialCoreferenceEngine'
 
 setup(
     name='pronomial',
@@ -14,5 +15,6 @@ setup(
     include_package_data=True,
     author_email='jarbasai@mailfence.com',
     description='pronomial postag/word_gender based coreference solver',
-    entry_points={'intentbox.coreference': PLUGIN_ENTRY_POINT}
+    entry_points={'intentbox.coreference': PLUGIN_ENTRY_POINT,
+                  'opm.agents.coref': AGENT_ENTRY_POINT}
 )
